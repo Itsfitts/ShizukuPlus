@@ -161,9 +161,9 @@ class AppViewHolder(private val binding: AppListItemBinding) :
             
             // Shizuku+ Power Tool: Freeze/Unfreeze
             if (ShizukuSettings.isCustomApiEnabled()) {
-                val shizukuService = rikka.shizuku.Shizuku.getService()
-                if (shizukuService != null) {
-                    val amPlus = af.shizuku.server.IShizukuService.Stub.asInterface(shizukuService).activityManagerPlus
+                val shizukuBinder = rikka.shizuku.Shizuku.getBinder()
+                if (shizukuBinder != null) {
+                    val amPlus = af.shizuku.server.IShizukuService.Stub.asInterface(shizukuBinder).activityManagerPlus
                     if (amPlus != null) {
                         val isFrozen = try { amPlus.isAppFrozen(packageName) } catch (e: Exception) { false }
                         val label = if (isFrozen) "Unfreeze App (Enable)" else "Freeze App (Disable)"
