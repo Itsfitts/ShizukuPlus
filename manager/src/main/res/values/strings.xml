@@ -522,7 +522,7 @@
     <string name="su_bridge_default_nav_hint">Set custom SU path in app settings</string>
     <string name="su_bridge_path_copied">SU path copied to clipboard</string>
     <string name="su_bridge_device_identity_title">Device Identity</string>
-    <string name="starter_service_started">Service started, this window will be automatically closed in 3 seconds</string>
+    <string name="starter_service_started">Service started.</string>
     <string name="su_bridge_device_identity_real">Real: %s</string>
     <string name="su_bridge_device_identity_spoofed">Spoofed: %s</string>
     <string name="su_bridge_device_identity_none">None (Real device shown)</string>
@@ -664,7 +664,11 @@
     <string name="starting_root_shell" translatable="false">Starting root shell…</string>
     <string name="start_with_root_failed">Can\'t start service because root permission is not granted or this device is not rooted.</string>
     <string name="starter_waiting">Waiting for service…</string>
-    <string name="starter_waiting_description">This may take up to 30 seconds.</string>
+    <string name="starter_waiting_description">Connecting — tap Cancel to stop.</string>
+    <string name="starter_retrying">Retrying connection…\n</string>
+    <string name="starter_retry">Retry</string>
+    <string name="adb_error_timeout">Service did not start in time. Please ensure Wireless Debugging is enabled and try again.</string>
+    <string name="adb_error_generic">An unexpected error occurred. Please try again.</string>
 
     <!-- WADB Starter -->
     <string name="wadb_notification_title">Starting Shizuku…</string>
@@ -918,4 +922,17 @@
     <string name="settings_shadow_binder_summary">Intercept and mock system service calls to hide device information or app state</string>
     <string name="settings_shadow_binder_hidden_packages">Hidden Packages</string>
     <string name="settings_shadow_binder_hidden_packages_summary">Comma-separated list of package names to hide from other apps</string>
+
+    <!-- Companion Mode -->
+    <string name="settings_category_companion">Companion Mode</string>
+    <string name="settings_companion_mode">Show Companion Card</string>
+    <string name="settings_companion_mode_summary">Show a home screen card for quickly switching to stock Shizuku</string>
+    <string name="settings_companion_fallback">Crash Fallback</string>
+    <string name="settings_companion_fallback_summary">After 3 consecutive crashes, show an option to open stock Shizuku in the crash notification</string>
+    <string name="home_companion_title">Stock Shizuku</string>
+    <string name="home_companion_description">Stock Shizuku is installed. Use it as a fallback if Shizuku+ has issues.</string>
+    <string name="home_companion_not_installed">Stock Shizuku is not installed. Install it from GitHub to use as a fallback.</string>
+    <string name="home_companion_open">Open</string>
+    <string name="home_companion_install">Install</string>
+    <string name="watchdog_open_stock_shizuku">Open Stock Shizuku</string>
     </resources>

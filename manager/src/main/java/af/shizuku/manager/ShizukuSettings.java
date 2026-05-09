@@ -30,6 +30,7 @@ public class ShizukuSettings {
         public static final String KEY_WATCHDOG = "watchdog";
         public static final String KEY_TCP_MODE = "tcp_mode";
         public static final String KEY_TCP_PORT = "tcp_port";
+        public static final String KEY_LAST_PORT = "last_adb_port";
         public static final String KEY_AUTO_DISABLE_USB_DEBUGGING = "auto_disable_usb_debugging";
         public static final String KEY_LANGUAGE = "language";
         public static final String KEY_TRANSLATION = "translation";
@@ -118,6 +119,10 @@ public class ShizukuSettings {
         public static final String KEY_LAST_CHECK_FAILED = "last_check_failed";
         public static final String KEY_UPDATE_CHANNEL = "update_channel"; // "stable" or "dev"
         public static final String KEY_LAST_SEEN_VERSION = "last_seen_version";
+
+        // Companion Mode (Shizuku+ additions)
+        public static final String KEY_COMPANION_MODE = "companion_mode";
+        public static final String KEY_COMPANION_FALLBACK = "companion_fallback";
     }
 
     private static SharedPreferences sPreferences;
@@ -293,6 +298,14 @@ public class ShizukuSettings {
             getPreferences().edit().remove(Keys.KEY_TCP_PORT).apply();
         }
         
+    }
+
+    public static int getLastPort() {
+        return getPreferences().getInt(Keys.KEY_LAST_PORT, 0);
+    }
+
+    public static void setLastPort(int port) {
+        getPreferences().edit().putInt(Keys.KEY_LAST_PORT, port).apply();
     }
 
     public static boolean getLegacyPairing() {
@@ -798,5 +811,25 @@ public class ShizukuSettings {
 
     public static void setUpdateChannel(String channel) {
         getPreferences().edit().putString(Keys.KEY_UPDATE_CHANNEL, channel).apply();
+    }
+
+    public static boolean isCompanionModeEnabled() {
+        SharedPreferences p = getPreferences();
+        return p != null && p.getBoolean(Keys.KEY_COMPANION_MODE, false);
+    }
+
+    public static void setCompanionModeEnabled(boolean enable) {
+        SharedPreferences p = getPreferences();
+        if (p != null) p.edit().putBoolean(Keys.KEY_COMPANION_MODE, enable).apply();
+    }
+
+    public static boolean isCompanionFallbackEnabled() {
+        SharedPreferences p = getPreferences();
+        return p != null && p.getBoolean(Keys.KEY_COMPANION_FALLBACK, false);
+    }
+
+    public static void setCompanionFallbackEnabled(boolean enable) {
+        SharedPreferences p = getPreferences();
+        if (p != null) p.edit().putBoolean(Keys.KEY_COMPANION_FALLBACK, enable).apply();
     }
 }
