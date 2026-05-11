@@ -167,8 +167,9 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
         });
 
         mainHandler.post(() -> {
-            sendBinderToClient();
-            sendBinderToManager();
+            List<Integer> userIds = UserManagerApis.getUserIdsNoThrow();
+            sendBinderToClient(userIds);
+            sendBinderToManager(userIds);
         });
     }
 
@@ -1167,7 +1168,11 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
     }
 
     void sendBinderToClient() {
-        for (int userId : UserManagerApis.getUserIdsNoThrow()) {
+        sendBinderToClient(UserManagerApis.getUserIdsNoThrow());
+    }
+
+    void sendBinderToClient(List<Integer> userIds) {
+        for (int userId : userIds) {
             sendBinderToClient(this, userId);
         }
     }
@@ -1197,11 +1202,15 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
     }
 
     void sendBinderToManager() {
-        sendBinderToManager(this);
+        sendBinderToManager(UserManagerApis.getUserIdsNoThrow());
     }
 
-    private static void sendBinderToManager(Binder binder) {
-        for (int userId : UserManagerApis.getUserIdsNoThrow()) {
+    void sendBinderToManager(List<Integer> userIds) {
+        sendBinderToManager(this, userIds);
+    }
+
+    private static void sendBinderToManager(Binder binder, List<Integer> userIds) {
+        for (int userId : userIds) {
             sendBinderToManager(binder, userId);
         }
     }
@@ -1268,7 +1277,7 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
 
             Bundle extra = new Bundle();
             extra.putParcelable("af.shizuku.plus.api.intent.extra.BINDER", new af.shizuku.api.BinderContainer(binder));
-            extra.putParcelable("rikka.shizuku.intent.extra.BINDER", new moe.shizuku.api.BinderContainer(binder));
+            extra.putParcelable("rikka.shizuku.intent.extra.BINDER", new af.shizuku.api.BinderContainer(binder));
 
             Bundle reply = IContentProviderUtils.callCompat(provider, null, name, "sendBinder", null, extra);
             if (reply != null) {
@@ -1421,7 +1430,7 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
             if (data != null) {
                 String packageName = data.getSchemeSpecificPart();
                 if (packageName != null) {
-                    clientManager.remove(packageName);
+                    clientManager.removeClientsForPackage(packageName);
                 }
             }
         }
