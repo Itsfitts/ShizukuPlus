@@ -91,7 +91,7 @@ jobs:
           echo KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }} > signing.properties
           echo KEYSTORE_ALIAS=${{ secrets.KEYSTORE_ALIAS }} >> signing.properties
           echo KEYSTORE_ALIAS_PASSWORD='${{ secrets.KEYSTORE_ALIAS_PASSWORD }}' >> signing.properties
-          echo KEYSTORE_FILE=../key.jks >> signing.properties
+          echo KEYSTORE_FILE=${{ github.workspace }}/key.jks >> signing.properties
           printf "%s" "${{ secrets.KEYSTORE }}" | base64 --decode > key.jks
 
       - name: Setup Gradle
@@ -107,14 +107,18 @@ jobs:
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
           [ -n "$SENTRY_DSN" ] && echo "SENTRY_DSN=${SENTRY_DSN}" >> gradle.properties || true
 
-          # Fast version extraction from git and build.gradle constants
+          # Extract version from build.gradle
+          BASE_VERSION=$(grep "baseVersionName =" build.gradle | cut -d'"' -f2)
           GIT_COUNT=$(git rev-list --count HEAD)
-          BASE_VERSION="13.6.0"
+          
           if [ "$IS_PRERELEASE" = "true" ]; then
-            VERSION="v${BASE_VERSION}-beta.${GIT_COUNT}"
+            VERSION="v${BASE_VERSION}.r${GIT_COUNT}-shizukuplus-prerelease"
+            ARGS="-Pbeta"
           else
-            VERSION="v${BASE_VERSION}"
+            VERSION="v${BASE_VERSION}.r${GIT_COUNT}-shizukuplus"
+            ARGS=""
           fi
+          
           echo "$VERSION" > version.txt
           echo "versionName=${VERSION}" >> $GITHUB_OUTPUT
 
@@ -123,17 +127,38 @@ jobs:
             APK_DIR="manager/build/outputs/apk/debug"
             ARTIFACT_NAME="shizukuplus-debug.apk"
           else
-            CMD="./gradlew :manager:assembleRelease"
+            # Only exclude Sentry tasks if we aren't going to upload them later
+            CMD="./gradlew :manager:assembleRelease $ARGS"
             APK_DIR="manager/build/outputs/apk/release"
             ARTIFACT_NAME="shizukuplus.apk"
           fi
-
-          [ "$IS_PRERELEASE" = "true" ] && CMD="$CMD -Pbeta"
 
           export GRADLE_OPTS="-Xmx4g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError"
           eval $CMD --stacktrace --info -x uploadSentryProguardMappingsRelease -x uploadSentryNativeSymbolsForRelease -x sentryUploadSourceBundleRelease -x :manager:lint
           
           FILE=$(find "$APK_DIR" -name "*.apk" -type f | head -1)
+          if [ -z "$FILE" ]; then
+            echo "Error: No APK found in $APK_DIR"
+            exit 1
+          fi
+          
+          # Verify if signed
+          if [ "$IS_DEBUG" = "false" ]; then
+            if ! unzip -l "$FILE" | grep -q "META-INF/.*\.RSA"; then
+              echo "WARNING: Release APK appears to be UNSIGNED!"
+              # Attempt to sign if key.jks exists (failsafe using apksigner for v2+ support)
+              if [ -f "key.jks" ]; then
+                echo "Attempting manual signing failsafe with apksigner..."
+                BUILD_TOOLS_VERSION=$(ls $ANDROID_HOME/build-tools | sort -V | tail -n 1)
+                $ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION/apksigner sign --ks key.jks \
+                  --ks-pass "pass:${{ secrets.KEYSTORE_PASSWORD }}" \
+                  --ks-key-alias "${{ secrets.KEYSTORE_ALIAS }}" \
+                  --key-pass "pass:${{ secrets.KEYSTORE_ALIAS_PASSWORD }}" \
+                  "$FILE"
+              fi
+            fi
+          fi
+
           RENAMED="$(dirname "$FILE")/$ARTIFACT_NAME"
           mv "$FILE" "$RENAMED"
 

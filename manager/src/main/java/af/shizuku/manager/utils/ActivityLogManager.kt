@@ -75,6 +75,7 @@ object ActivityLogManager {
     
     // Default retention count
     private var retentionCount = 100
+    private var appContext: Context? = null
     
     /**
      * Initialize the ActivityLogManager with the application context.
@@ -87,6 +88,7 @@ object ActivityLogManager {
             Timber.tag(TAG).w("ActivityLogManager already initialized")
             return
         }
+        appContext = context.applicationContext
 
         scope.launch {
             try {
@@ -129,6 +131,9 @@ object ActivityLogManager {
             return
         }
 
+        // Collect the Room flow for live updates. Room flows never complete, so
+        // the collect suspends indefinitely and handles every DB change going forward.
+        // Retry on failure up to 3 times in case the DB isn't ready immediately.
         scope.launch {
             var retryCount = 0
             while (retryCount < 3) {
@@ -150,13 +155,15 @@ object ActivityLogManager {
                         }
                         Timber.tag(TAG).d("Loaded ${records.size} logs from database")
                     }
-                    break // Success
+                    // collect() only returns if the flow completes — Room flows don't,
+                    // so reaching here means the scope was cancelled. Exit cleanly.
+                    return@launch
                 } catch (e: Exception) {
                     retryCount++
                     Timber.tag(TAG).e(e, "Error loading logs from database (retry $retryCount)")
                     if (retryCount >= 3) {
                         io.sentry.Sentry.captureException(e)
-                        throw e
+                        return@launch
                     }
                     delay(500)
                 }
@@ -176,6 +183,13 @@ object ActivityLogManager {
         if (!isInitialized.get()) {
             Timber.tag(TAG).w("ActivityLogManager not initialized, ignoring log")
             return
+        }
+        
+        // Push to Samsung Live Activity status bar if enabled
+        appContext?.let { ctx ->
+            if (ShizukuSettings.isLiveActivityEnabled()) {
+                LiveActivityNotificationManager.show(ctx, "$appName: $action")
+            }
         }
         
         val record = ActivityLogRecord(

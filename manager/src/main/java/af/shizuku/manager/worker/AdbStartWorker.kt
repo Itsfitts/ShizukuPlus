@@ -32,6 +32,7 @@ import kotlinx.coroutines.withTimeout
 import af.shizuku.manager.R
 import af.shizuku.manager.ShizukuSettings
 import af.shizuku.manager.adb.AdbMdns
+import af.shizuku.manager.utils.ActivityLogManager
 import af.shizuku.manager.adb.AdbStarter
 import af.shizuku.manager.receiver.ShizukuReceiverStarter
 import af.shizuku.manager.receiver.ShizukuReceiverStarter.WorkerState
@@ -59,7 +60,12 @@ class AdbStartWorker(context: Context, params: WorkerParameters) : CoroutineWork
                 AdbStarter.stopTcp(applicationContext, tcpPort)
             }
 
-            val port = tcpPort.takeIf { it > 0 && (!EnvironmentUtils.isWifiRequired() || ShizukuSettings.isForceStartWadbEnabled()) } ?: callbackFlow {
+            val savedPort = ShizukuSettings.getLastPort()
+            val isWifiOk = !EnvironmentUtils.isWifiRequired() || ShizukuSettings.isForceStartWadbEnabled()
+            val port = when {
+                tcpPort > 0 && isWifiOk -> tcpPort
+                savedPort > 0 && isWifiOk && runAttemptCount == 0 -> savedPort
+                else -> callbackFlow {
                 val adbMdns = AdbMdns(applicationContext, AdbMdns.TLS_CONNECT) { p ->
                     if (p > 0) trySend(p)
                 }
@@ -140,9 +146,11 @@ class AdbStartWorker(context: Context, params: WorkerParameters) : CoroutineWork
                     unlockReceiver?.let { applicationContext.unregisterReceiver(it) }
                 }
             }.first()
-            
+            }
+
             AdbStarter.startAdb(applicationContext, port)
             Starter.waitForBinder()
+            ActivityLogManager.log("Shizuku", applicationContext.packageName, "Service started via background ADB worker on port $port")
 
             val nm = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             nm.cancel(ShizukuReceiverStarter.NOTIFICATION_ID)
@@ -165,9 +173,18 @@ class AdbStartWorker(context: Context, params: WorkerParameters) : CoroutineWork
             val ignored = listOf(
                 EOFException::class,
                 SecurityException::class,
-                TimeoutException::class
+                TimeoutException::class,
+                java.net.ConnectException::class,
+                java.net.SocketException::class,
+                java.net.SocketTimeoutException::class
             )
-            if (ignored.none { it.isInstance(e) }) showErrorNotification(applicationContext, e)
+            // Only show error notification if it's not a common transient error,
+            // or if we've already tried several times and it's still failing.
+            if (ignored.none { it.isInstance(e) } || runAttemptCount >= 5) {
+                if (e !is SecurityException && e !is TimeoutException) {
+                    showErrorNotification(applicationContext, e)
+                }
+            }
 
             if (ShizukuStateMachine.update() == ShizukuStateMachine.State.RUNNING) {
                 return Result.success()

@@ -17,6 +17,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import af.shizuku.manager.R
 import af.shizuku.manager.ShizukuSettings
+import af.shizuku.manager.utils.ActivityLogManager
 import af.shizuku.manager.adb.AdbClient
 import af.shizuku.manager.adb.AdbKey
 import af.shizuku.manager.adb.PreferenceAdbKeyStore
@@ -97,6 +98,8 @@ object AdbStarter {
                     connectWithRetry(client)
                     log?.invoke("Successfully connected on port $activePort...\n")
                     client.runCommand("shell:${Starter.internalCommand}")
+                    ShizukuSettings.setLastPort(activePort)
+                    ActivityLogManager.log("Shizuku", context.packageName, "Service started via ADB on port $activePort")
                     ShizukuStateMachine.update()
                 }
             }
@@ -169,13 +172,13 @@ object AdbStarter {
     }
 
     private suspend fun connectWithRetry(client: AdbClient) {
-        var delayTime = 200L
-        val maxAttempts = 8
+        var delayTime = 500L
+        val maxAttempts = 12
         for (attempt in 1..maxAttempts) {
             try {
                 if (attempt > 1) {
                     delay(delayTime)
-                    delayTime = (delayTime * 1.5).toLong().coerceAtMost(3000L) // Exponential backoff up to 3s
+                    delayTime = (delayTime * 1.5).toLong().coerceAtMost(5000L) // Exponential backoff up to 5s
                 }
                 client.connect()
                 break

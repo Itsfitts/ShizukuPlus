@@ -64,6 +64,7 @@ import rikka.rish.RishConfig;
 import rikka.shizuku.ShizukuApiConstants;
 import rikka.shizuku.server.api.IContentProviderUtils;
 import rikka.shizuku.server.util.HandlerUtil;
+import rikka.shizuku.server.util.Logger;
 import rikka.shizuku.server.util.UserHandleCompat;
 import rikka.shizuku.server.ClientManager;
 import rikka.shizuku.server.ClientRecord;
@@ -142,6 +143,28 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
         });
 
         BinderSender.register(this);
+
+        ((Logger) LOGGER).setEventDispatcher((priority, tag, message, throwable) -> {
+            List<ClientRecord> records = clientManager.findClients(managerAppId);
+            for (ClientRecord record : records) {
+                if (record.client != null) {
+                    try {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("{");
+                        sb.append("\"priority\":").append(priority).append(",");
+                        sb.append("\"tag\":\"").append(tag).append("\",");
+                        sb.append("\"message\":\"").append(message.replace("\"", "\\\"").replace("\n", "\\n")).append("\"");
+                        if (throwable != null) {
+                            String st = Log.getStackTraceString(throwable).replace("\"", "\\\"").replace("\n", "\\n");
+                            sb.append(",\"stacktrace\":\"").append(st).append("\"");
+                        }
+                        sb.append("}");
+                        record.client.dispatchSentryEvent(sb.toString());
+                    } catch (Throwable ignored) {
+                    }
+                }
+            }
+        });
 
         mainHandler.post(() -> {
             List<Integer> userIds = UserManagerApis.getUserIdsNoThrow();
@@ -300,24 +323,30 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
         // The manager app (the owner of this service) is always allowed
         if (UserHandleCompat.getAppId(uid) == managerAppId) return false;
 
+        boolean isBlocked = false;
+
         // Block sensitive system operations for all other apps if firewall is active
         if ("android.os.IPowerManager".equals(descriptor)) {
             // 17 = reboot, 18 = shutdown
-            if (code == 17 || code == 18) return true;
+            if (code == 17 || code == 18) isBlocked = true;
         } else if ("android.app.IActivityManager".equals(descriptor)) {
             // 61 = clearApplicationUserData
-            if (code == 61) return true;
+            if (code == 61) isBlocked = true;
         }
         
         // Dynamic policy from settings
         String blockedDescriptors = plusSettingsMap.get("firewall_blocked_descriptors");
         if (blockedDescriptors != null && !blockedDescriptors.isEmpty()) {
             for (String blocked : blockedDescriptors.split(",")) {
-                if (descriptor.equals(blocked.trim())) return true;
+                if (descriptor.equals(blocked.trim())) isBlocked = true;
             }
         }
 
-        return false;
+        if (isBlocked) {
+            LOGGER.w("Binder call blocked: UID=%d, Descriptor=%s, Code=%d", uid, descriptor, code);
+        }
+
+        return isBlocked;
     }
 
     @Override

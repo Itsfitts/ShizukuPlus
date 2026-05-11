@@ -1,8 +1,11 @@
 package af.shizuku.manager.starter
 
 import android.app.Application
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.HapticFeedbackConstants
+import android.view.View
 import timber.log.Timber
 import androidx.activity.viewModels
 import androidx.lifecycle.AndroidViewModel
@@ -14,6 +17,7 @@ import com.topjohnwu.superuser.CallbackList
 import com.topjohnwu.superuser.Shell
 import java.net.ConnectException
 import java.net.SocketTimeoutException
+import java.util.concurrent.TimeoutException
 import javax.net.ssl.SSLProtocolException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -28,6 +32,7 @@ import af.shizuku.manager.R
 import af.shizuku.manager.adb.AdbKeyException
 import af.shizuku.manager.adb.AdbStarter
 import af.shizuku.manager.app.AppBarActivity
+import af.shizuku.manager.utils.ActivityLogManager
 import af.shizuku.manager.utils.ShizukuStateMachine
 import af.shizuku.manager.databinding.StarterActivityBinding
 import rikka.lifecycle.Resource
@@ -55,41 +60,40 @@ class StarterActivity : AppBarActivity() {
             headerTitle.setText(if (isRoot) R.string.home_root_title else R.string.home_adb_title)
         }
 
+        binding.cancelButton.setOnClickListener { finish() }
+
         viewModel.output.observe(this) { result ->
             val output = result.data?.trim() ?: return@observe
             if (output.endsWith(Starter.serviceStartedMessage)) {
-                window?.decorView?.postDelayed({
-                    if (!isFinishing) finish()
-                }, 600)
+                val haptic = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+                    HapticFeedbackConstants.CONFIRM else HapticFeedbackConstants.VIRTUAL_KEY
+                binding.root.performHapticFeedback(haptic)
+                if (!isFinishing) finish()
             } else if (result.status == Status.ERROR) {
+                binding.progressIndicator.visibility = View.GONE
+                binding.cancelButton.visibility = View.GONE
                 var message = 0
                 when (result.error) {
-                    is AdbKeyException -> {
-                        message = R.string.adb_error_key_store
-                    }
-                    is NotRootedException -> {
-                        message = R.string.start_with_root_failed
-                    }
-                    is SocketTimeoutException -> {
-                        message = R.string.cannot_connect_port
-                    }
-                    is ConnectException -> {
-                        message = R.string.cannot_connect_port
-                    }
-                    is SSLProtocolException -> {
-                        message = R.string.adb_pair_required
-                    }
+                    is AdbKeyException -> message = R.string.adb_error_key_store
+                    is NotRootedException -> message = R.string.start_with_root_failed
+                    is SocketTimeoutException -> message = R.string.cannot_connect_port
+                    is ConnectException -> message = R.string.cannot_connect_port
+                    is SSLProtocolException -> message = R.string.adb_pair_required
+                    is TimeoutException -> message = R.string.adb_error_timeout
                 }
-
-                if (message != 0) {
-                    MaterialAlertDialogBuilder(this)
-                        .setMessage(message)
-                        .setPositiveButton(android.R.string.ok) { _, _ -> finish() }
-                        .setOnDismissListener { finish() }
-                        .show()
-                }
+                val dialogMessage = if (message != 0) message else R.string.adb_error_generic
+                MaterialAlertDialogBuilder(this)
+                    .setMessage(dialogMessage)
+                    .setPositiveButton(android.R.string.ok) { _, _ -> finish() }
+                    .setNegativeButton(R.string.starter_retry) { _, _ ->
+                        binding.progressIndicator.visibility = View.VISIBLE
+                        binding.cancelButton.visibility = View.VISIBLE
+                        viewModel.retry()
+                    }
+                    .show()
             }
             binding.text1.text = output
+            binding.scrollView.post { binding.scrollView.scrollTo(0, Int.MAX_VALUE) }
         }
     }
 
@@ -131,8 +135,12 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private var started = false
+    private var lastRoot = false
+    private var lastPort = 0
 
     fun start(root: Boolean, port: Int) {
+        lastRoot = root
+        lastPort = port
         if (!root && port !in 1..65535) {
             log(error = IllegalArgumentException("Invalid port value: $port. Port must be between 1 and 65535."))
             return
@@ -147,10 +155,16 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun retry() {
+        started = false
+        sb.clear()
+        _output.postValue(Resource.success(sb))
+        start(lastRoot, lastPort)
+    }
+
     private fun log(line: String? = null, error: Throwable? = null) {
         line?.let { sb.appendLine(it) }
         error?.let { sb.appendLine().appendLine(Log.getStackTraceString(it)) }
-
         if (error == null) _output.postValue(Resource.success(sb))
         else _output.postValue(Resource.error(error, sb))
     }
@@ -178,6 +192,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
                     .submit {
                         if (it.isSuccess) {
                             ShizukuStateMachine.update()
+                            ActivityLogManager.log("Shizuku", appContext.packageName, "Service started via root")
                             cont.resume(Unit)
                         } else {
                             cont.resumeWithException(Exception("Failed to start with root"))
