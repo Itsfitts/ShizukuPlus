@@ -11,6 +11,7 @@ import io.sentry.Sentry
 import io.sentry.android.core.SentryAndroid
 import io.sentry.android.timber.SentryTimberTree
 import io.sentry.Breadcrumb
+import android.content.Intent
 import af.shizuku.manager.service.WatchdogService
 import af.shizuku.manager.utils.ActivityLogManager
 import af.shizuku.manager.utils.ShizukuStateMachine
@@ -236,6 +237,42 @@ class ShizukuApplication : Application(), Configuration.Provider {
             ActivityLogManager.log(appName, packageName, action)
         }
 
+        Shizuku.addSentryEventListener { eventJson ->
+            try {
+                val jsonObject = org.json.JSONObject(eventJson)
+                val levelStr = jsonObject.optString("level", "error")
+                val tag = jsonObject.optString("tag", "ShizukuPlus")
+                val message = jsonObject.optString("message", "")
+                val stackTrace = jsonObject.optString("stackTrace", "")
+
+                val sentryLevel = when (levelStr.uppercase()) {
+                    "INFO" -> io.sentry.SentryLevel.INFO
+                    "WARN" -> io.sentry.SentryLevel.WARNING
+                    "ERROR" -> io.sentry.SentryLevel.ERROR
+                    "FATAL" -> io.sentry.SentryLevel.FATAL
+                    "DEBUG" -> io.sentry.SentryLevel.DEBUG
+                    else -> io.sentry.SentryLevel.ERROR
+                }
+
+                io.sentry.Sentry.withScope { scope ->
+                    scope.setTag("server_side", "true")
+                    scope.setTag("server_tag", tag)
+                    if (stackTrace.isNotEmpty()) {
+                        scope.setExtra("stackTrace", stackTrace)
+                    }
+                    val event = io.sentry.SentryEvent()
+                    event.level = sentryLevel
+                    val sentryMessage = io.sentry.protocol.Message()
+                    sentryMessage.formatted = "[$tag] $message"
+                    event.message = sentryMessage
+                    
+                    io.sentry.Sentry.captureEvent(event)
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to parse and dispatch server Sentry event: $eventJson")
+            }
+        }
+
         val userManager = getSystemService(Context.USER_SERVICE) as? UserManager
         if (userManager == null || userManager.isUserUnlocked) {
             try {
@@ -256,7 +293,13 @@ class ShizukuApplication : Application(), Configuration.Provider {
             Timber.plant(Timber.DebugTree())
         }
 
-        // 1. Initialize Sentry FIRST to catch all crashes including early startup failures
+        // 1. Run security check
+        if (af.shizuku.manager.security.SecurityGuard.isTampered()) {
+            Timber.e("Security violation: Environment tampered!")
+            // Optionally: crash or notify user
+        }
+
+        // 2. Initialize Sentry FIRST to catch all crashes including early startup failures
         initializeSentryEarly()
 
         // 2. Register persistent crash handler
@@ -304,6 +347,9 @@ class ShizukuApplication : Application(), Configuration.Provider {
         // 5. Initialize settings and managers
         try {
             initializeManagers()
+            if (ShizukuSettings.isLiveActivityEnabled()) {
+                startService(Intent(this, af.shizuku.manager.service.ShizukuLiveService::class.java))
+            }
         } catch (e: Throwable) {
             Timber.e(e, "Failed to initialize managers")
             Sentry.captureException(e)
