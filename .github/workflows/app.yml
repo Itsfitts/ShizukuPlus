@@ -17,9 +17,6 @@ on:
         required: false
         default: false
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -137,13 +134,14 @@ jobs:
           fi
 
           export GRADLE_OPTS="-Xmx4g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError"
-          eval $CMD --stacktrace --info -x :manager:lint
+          eval $CMD --stacktrace --info -x uploadSentryProguardMappingsRelease -x uploadSentryNativeSymbolsForRelease -x sentryUploadSourceBundleRelease -x :manager:lint
           
           FILE=$(find "$APK_DIR" -name "*.apk" -type f | head -1)
           if [ -z "$FILE" ]; then
             echo "Error: No APK found in $APK_DIR"
             exit 1
           fi
+
           
           # Verify if signed
           if [ "$IS_DEBUG" = "false" ]; then
@@ -172,7 +170,7 @@ jobs:
         if: ${{ env.SENTRY_AUTH_TOKEN != '' && env.IS_DEBUG == 'false' }}
         continue-on-error: true
         run: |
-          echo "Sentry is disabled for this build. Skipping."
+          ./gradlew :manager:uploadSentryProguardMappingsRelease :manager:uploadSentryNativeSymbolsForRelease
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
