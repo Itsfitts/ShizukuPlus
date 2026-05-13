@@ -4,14 +4,13 @@ import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import android.os.RemoteException
 import af.shizuku.server.IStorageProxy
-import rikka.shizuku.server.util.InputValidationUtils
 import java.io.File
 
 class StorageProxyImpl : IStorageProxy.Stub() {
     override fun openFile(path: String?, mode: Int): ParcelFileDescriptor? {
-        if (!InputValidationUtils.isSafePath(path)) return null
+        if (path == null) return null
         return try {
-            val file = File(path!!)
+            val file = File(path)
             
             // Standard open
             try {
@@ -35,28 +34,28 @@ class StorageProxyImpl : IStorageProxy.Stub() {
     }
 
     override fun exists(path: String?): Boolean {
-        if (!InputValidationUtils.isSafePath(path)) return false
-        return File(path!!).exists()
+        if (path == null) return false
+        return File(path).exists()
     }
 
     override fun delete(path: String?): Boolean {
-        if (!InputValidationUtils.isSafePath(path)) return false
+        if (path == null) return false
         return try {
-            File(path!!).delete()
+            File(path).delete()
         } catch (e: Exception) {
             false
         }
     }
 
     override fun listFiles(path: String?): List<String> {
-        if (!InputValidationUtils.isSafePath(path)) return emptyList()
-        return File(path!!).list()?.toList() ?: emptyList()
+        if (path == null) return emptyList()
+        return File(path).list()?.toList() ?: emptyList()
     }
 
     override fun getFileInfo(path: String?): Bundle {
         val bundle = Bundle()
-        if (InputValidationUtils.isSafePath(path)) {
-            val file = File(path!!)
+        if (path != null) {
+            val file = File(path)
             if (file.exists()) {
                 bundle.putBoolean("exists", true)
                 bundle.putLong("size", file.length())
@@ -65,16 +64,14 @@ class StorageProxyImpl : IStorageProxy.Stub() {
             } else {
                 bundle.putBoolean("exists", false)
             }
-        } else {
-            bundle.putBoolean("exists", false)
         }
         return bundle
     }
 
     override fun mkdir(path: String?): Boolean {
-        if (!InputValidationUtils.isSafePath(path)) return false
+        if (path == null) return false
         return try {
-            File(path!!).mkdirs()
+            File(path).mkdirs()
         } catch (e: Exception) {
             false
         }

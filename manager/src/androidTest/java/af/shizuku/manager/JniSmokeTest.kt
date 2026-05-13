@@ -37,7 +37,7 @@ class JniSmokeTest {
      * the method signature or class path didn't match.
      */
     @Test
-    fun pairingContextNativeConstructorIsLinked() {
+    fun PairingContext_nativeConstructor_is_linked() {
         System.loadLibrary("adb")
 
         try {

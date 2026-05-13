@@ -58,7 +58,12 @@ class StartWirelessAdbViewHolder(
         fun start(context: android.content.Context, scope: CoroutineScope, discoveredPort: Int = -1) {
             val sysPropPort = EnvironmentUtils.getAdbTcpPort()
             val tcpPort = if (sysPropPort in 1..65535) sysPropPort else discoveredPort
-            val validTcpPort = if (tcpPort in 1..65535) tcpPort else -1
+            val lastPort = ShizukuSettings.getLastPort()
+            val validTcpPort = when {
+                tcpPort in 1..65535 -> tcpPort
+                lastPort in 1..65535 -> lastPort
+                else -> -1
+            }
             if (validTcpPort > 0 && ShizukuSettings.getTcpMode()) {
                 val intent = android.content.Intent(context, StarterActivity::class.java).apply {
                     putExtra(StarterActivity.EXTRA_PORT, validTcpPort)
@@ -74,6 +79,7 @@ class StartWirelessAdbViewHolder(
 
     init {
         containerBinding.root.applySpringTouch()
+        containerBinding.root.setOnLongClickListener { HomeEditMode.enter(); true }
         binding.button1.setOnClickListener { v: View ->
             if (ShizukuStateMachine.get() == ShizukuStateMachine.State.STARTING) {
                 Toast.makeText(context, context.getString(R.string.toast_shizuku_already_starting), Toast.LENGTH_SHORT).show()
@@ -98,7 +104,12 @@ class StartWirelessAdbViewHolder(
             val discoveredPort = withState(homeModel) { it.discoveredAdbPort }
             val tcpPort = if (sysPropPort in 1..65535) sysPropPort else discoveredPort
             val tcpMode = ShizukuSettings.getTcpMode()
-            val validTcpPort = if (tcpPort in 1..65535) tcpPort else -1
+            val lastPort = ShizukuSettings.getLastPort()
+            val validTcpPort = when {
+                tcpPort in 1..65535 -> tcpPort
+                lastPort in 1..65535 -> lastPort
+                else -> -1
+            }
 
             if (validTcpPort <= 0 && !EnvironmentUtils.isTlsSupported()) {
                 WadbNotEnabledDialogFragment().show(context.asActivity<FragmentActivity>().supportFragmentManager)

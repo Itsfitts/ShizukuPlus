@@ -16,8 +16,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.view.animation.DecelerateInterpolator
-import android.view.animation.AccelerateInterpolator
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.content.res.AppCompatResources
@@ -68,7 +66,11 @@ class ApplicationManagementActivity : AppBarActivity(), AppViewHolder.Callbacks 
 
         val binding = AppsActivityBinding.inflate(layoutInflater, rootView, false)
         setContentView(binding.root)
-        
+
+        // Assign before observe() — LiveData delivers synchronously on config change
+        // and the observer references recyclerView, so it must be ready first.
+        recyclerView = binding.list
+
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         // Empty state view
@@ -139,7 +141,6 @@ class ApplicationManagementActivity : AppBarActivity(), AppViewHolder.Callbacks 
         }
         viewModel.load()
 
-        recyclerView = binding.list
         recyclerView.adapter = adapter
         
         androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(recyclerView) { v, insets ->
@@ -360,7 +361,7 @@ class ApplicationManagementActivity : AppBarActivity(), AppViewHolder.Callbacks 
             "open_app" -> Triple(android.R.attr.colorPrimary, com.google.android.material.R.attr.colorOnPrimary, R.drawable.ic_outline_play_arrow_24)
             "app_info" -> Triple(com.google.android.material.R.attr.colorSecondary, com.google.android.material.R.attr.colorOnSecondary, R.drawable.ic_outline_info_24)
             "toggle_permission" -> Triple(com.google.android.material.R.attr.colorTertiary, com.google.android.material.R.attr.colorOnTertiary, R.drawable.ic_shield_24)
-            "hide_from_list" -> Triple(android.R.attr.colorError, com.google.android.material.R.attr.colorOnError, R.drawable.ic_visibility_24)
+            "hide_from_list" -> Triple(android.R.attr.colorError, com.google.android.material.R.attr.colorOnError, R.drawable.ic_visibility_off_24)
             else -> Triple(com.google.android.material.R.attr.colorSecondary, com.google.android.material.R.attr.colorOnSecondary, R.drawable.ic_outline_info_24)
         }
         val tv = TypedValue()

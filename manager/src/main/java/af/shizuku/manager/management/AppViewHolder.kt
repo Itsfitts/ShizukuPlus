@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.net.Uri
+import android.util.TypedValue
 import android.provider.Settings
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
@@ -143,8 +144,11 @@ class AppViewHolder(private val binding: AppListItemBinding) :
                             AuthorizationManager.grant(packageName, uid)
                             ActivityLogManager.log(appLabel, packageName, "Long-press: grant_permission")
                         }
-                        adapter.notifyItemChanged(adapterPosition, Any())
-                        adapter.notifyItemChanged(0)
+                        val pos = adapterPosition
+                        if (pos != androidx.recyclerview.widget.RecyclerView.NO_POSITION) {
+                            adapter.notifyItemChanged(pos, Any())
+                            adapter.notifyItemChanged(0)
+                        }
                     } catch (e: SecurityException) {
                         if (runCatching { Shizuku.getUid() }.getOrDefault(-1) != 0) {
                             showAdbLimitedDialog(context)
@@ -161,9 +165,9 @@ class AppViewHolder(private val binding: AppListItemBinding) :
             
             // Shizuku+ Power Tool: Freeze/Unfreeze
             if (ShizukuSettings.isCustomApiEnabled()) {
-                val shizukuBinder = rikka.shizuku.Shizuku.getBinder()
-                if (shizukuBinder != null) {
-                    val amPlus = af.shizuku.server.IShizukuService.Stub.asInterface(shizukuBinder).activityManagerPlus
+                val shizukuService = rikka.shizuku.Shizuku.getBinder()
+                if (shizukuService != null) {
+                    val amPlus = af.shizuku.server.IShizukuService.Stub.asInterface(shizukuService).activityManagerPlus
                     if (amPlus != null) {
                         val isFrozen = try { amPlus.isAppFrozen(packageName) } catch (e: Exception) { false }
                         val label = if (isFrozen) "Unfreeze App (Enable)" else "Freeze App (Disable)"
@@ -173,7 +177,8 @@ class AppViewHolder(private val binding: AppListItemBinding) :
                                 if (success) {
                                     Toast.makeText(context, if (isFrozen) "App unfrozen" else "App frozen", Toast.LENGTH_SHORT).show()
                                     ActivityLogManager.log(appLabel, packageName, "Long-press: ${if (isFrozen) "unfreeze" else "freeze"}")
-                                    adapter.notifyItemChanged(adapterPosition)
+                                    val pos = adapterPosition
+                                    if (pos != androidx.recyclerview.widget.RecyclerView.NO_POSITION) adapter.notifyItemChanged(pos)
                                 } else {
                                     Toast.makeText(context, "Operation failed", Toast.LENGTH_SHORT).show()
                                 }
@@ -211,8 +216,11 @@ class AppViewHolder(private val binding: AppListItemBinding) :
             if (uid != 0) showAdbLimitedDialog(context)
             return
         }
-        adapter.notifyItemChanged(adapterPosition, Any())
-        adapter.notifyItemChanged(0)
+        val pos = adapterPosition
+        if (pos != androidx.recyclerview.widget.RecyclerView.NO_POSITION) {
+            adapter.notifyItemChanged(pos, Any())
+            adapter.notifyItemChanged(0)
+        }
     }
 
     // ----- Helpers -----
@@ -263,7 +271,10 @@ class AppViewHolder(private val binding: AppListItemBinding) :
                 ActivityLogManager.log(appLabel, packageName, "Toggle Enhancement: ${enhancements[which].key} -> $isChecked")
             }
             .setPositiveButton(android.R.string.ok) { _, _ ->
-                adapter.notifyItemChanged(adapterPosition)
+                val pos = adapterPosition
+                if (pos != androidx.recyclerview.widget.RecyclerView.NO_POSITION) {
+                    adapter.notifyItemChanged(pos)
+                }
             }
             .show()
     }
@@ -271,18 +282,6 @@ class AppViewHolder(private val binding: AppListItemBinding) :
     override fun onBind() {
         val appInfo = ai ?: return
         val context = itemView.context
-        
-        // M3E Expressive Animation: Scale and Fade Entrance
-        itemView.alpha = 0f
-        itemView.scaleX = 0.95f
-        itemView.scaleY = 0.95f
-        itemView.animate()
-            .alpha(1f)
-            .scaleX(1f)
-            .scaleY(1f)
-            .setDuration(500)
-            .setInterpolator(android.view.animation.PathInterpolator(0.2f, 0f, 0f, 1f))
-            .start()
 
         val userId = UserHandleCompat.getUserId(appInfo.uid)
         val appLabel = AppIconCache.getLabel(context, appInfo)
@@ -312,7 +311,10 @@ class AppViewHolder(private val binding: AppListItemBinding) :
             appContextView.visibility = View.VISIBLE
             val enabledAny = metadata.potentialEnhancements.any { ShizukuSettings.isAppEnhancementEnabled(packageName, it.key) }
             val badge = if (enabledAny) context.getString(R.string.app_management_badge_enhanced) else context.getString(R.string.app_management_badge_upgrade)
-            val color = if (enabledAny) "#4CAF50" else "#FF9800"
+            val colorAttr = if (enabledAny) com.google.android.material.R.attr.colorTertiary else com.google.android.material.R.attr.colorSecondary
+            val tv = TypedValue()
+            context.theme.resolveAttribute(colorAttr, tv, true)
+            val color = String.format("#%06X", tv.data and 0xFFFFFF)
 
             appContextView.text = context.getString(R.string.app_management_badge_format, color, badge, metadata.description).toHtml()
             appContextView.setOnClickListener { showEnhancementSettings(context, metadata) }
