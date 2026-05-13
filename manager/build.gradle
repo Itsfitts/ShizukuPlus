@@ -5,6 +5,7 @@ import com.android.build.gradle.internal.tasks.CompileArtProfileTask
 plugins {
     id "com.android.application"
     id "org.jetbrains.kotlin.android"
+    id "org.jetbrains.kotlin.plugin.compose" version "2.2.20"
     id "dev.rikka.tools.refine"
     id "dev.rikka.tools.autoresconfig"
     id "dev.rikka.tools.materialthemebuilder"
@@ -35,6 +36,10 @@ android {
         viewBinding = true
         prefab = true
         aidl = true
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "2.2.20"
     }
     signingConfigs {
         sign {}
@@ -214,6 +219,9 @@ dependencies {
     implementation libs.androidx.transition
     implementation libs.androidx.dynamicanimation
     implementation libs.androidx.interpolator
+    implementation libs.androidx.glance.appwidget
+    implementation libs.androidx.biometric
+    implementation libs.androidx.core.remoteviews
 
     implementation libs.timber
     implementation libs.coil
@@ -290,6 +298,12 @@ sentry {
     
     // Track releases with git commit info
     ignoredBuildTypes = ["debug"]
+
+    // Project uses Glance (compose-based widgets) but not full compose-ui.
+    // Disable Sentry's compose bytecode instrumentation to avoid R8 missing-class errors.
+    tracingInstrumentation {
+        enabled = false
+    }
 }
 
 apply from: rootProject.file("signing.gradle")

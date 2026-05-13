@@ -123,6 +123,8 @@ public class ShizukuSettings {
         // Companion Mode (Shizuku+ additions)
         public static final String KEY_COMPANION_MODE = "companion_mode";
         public static final String KEY_COMPANION_FALLBACK = "companion_fallback";
+        public static final String KEY_LIVE_ACTIVITY_ENABLED = "live_activity_enabled";
+        public static final String KEY_STEALTH_MODE = "stealth_mode";
     }
 
     private static SharedPreferences sPreferences;
@@ -489,6 +491,11 @@ public class ShizukuSettings {
         return p == null || p.getBoolean(Keys.KEY_AI_CORE_PLUS_ENABLED, true);
     }
 
+    public static void setAICorePlusEnabled(boolean enabled) {
+        SharedPreferences p = getPreferences();
+        if (p != null) p.edit().putBoolean(Keys.KEY_AI_CORE_PLUS_ENABLED, enabled).apply();
+    }
+
     public static boolean isWindowManagerPlusEnabled() {
         SharedPreferences p = getPreferences();
         return p == null || p.getBoolean(Keys.KEY_WINDOW_MANAGER_PLUS_ENABLED, true);
@@ -831,5 +838,26 @@ public class ShizukuSettings {
     public static void setCompanionFallbackEnabled(boolean enable) {
         SharedPreferences p = getPreferences();
         if (p != null) p.edit().putBoolean(Keys.KEY_COMPANION_FALLBACK, enable).apply();
+    }
+
+    public static boolean isStealthModeEnabled() {
+        SharedPreferences p = getPreferences();
+        return p != null && p.getBoolean(Keys.KEY_STEALTH_MODE, false);
+    }
+
+    public static void setStealthModeEnabled(boolean enable) {
+        SharedPreferences p = getPreferences();
+        if (p != null) p.edit().putBoolean(Keys.KEY_STEALTH_MODE, enable).apply();
+    }
+
+
+    public static boolean isLiveActivityEnabled() {
+        SharedPreferences p = getPreferences();
+        return p != null && p.getBoolean(Keys.KEY_LIVE_ACTIVITY_ENABLED, false);
+    }
+
+    public static void setLiveActivityEnabled(boolean enable) {
+        SharedPreferences p = getPreferences();
+        if (p != null) p.edit().putBoolean(Keys.KEY_LIVE_ACTIVITY_ENABLED, enable).apply();
     }
 }

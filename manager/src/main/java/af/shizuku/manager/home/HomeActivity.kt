@@ -6,7 +6,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.os.Process
 import android.text.method.LinkMovementMethod
 import timber.log.Timber
 import android.util.TypedValue
@@ -131,7 +130,7 @@ abstract class HomeActivity : AppBarActivity(), MavericksView {
         emptyStateView.setDescription(R.string.empty_state_description_no_home_cards)
         emptyStateView.setActionText(R.string.empty_state_action_restore_home_cards)
         emptyStateView.setActionClickListener {
-            startActivity(android.content.Intent(this, af.shizuku.manager.settings.SettingsActivity::class.java))
+            HomeEditMode.enter()
         }
 
         // Initial status load

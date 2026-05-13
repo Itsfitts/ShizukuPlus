@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import af.shizuku.manager.R
 import af.shizuku.manager.ShizukuSettings
+import af.shizuku.manager.security.BiometricLock
 import af.shizuku.manager.ShizukuSettings.Keys.*
 import rikka.shizuku.Shizuku
 import af.shizuku.server.IShizukuService
@@ -111,7 +112,10 @@ class ShizukuPlusSettingsFragment : BaseSettingsFragment() {
             "root_busybox_mocking_enabled" to "root_busybox_mocking",
             "vector_enabled" to "vector",
             "experimental_root_compat" to "experimental_root",
-            "spoof_device_enabled" to "spoof_device"
+            "spoof_device_enabled" to "spoof_device",
+            "shadow_binder_enabled" to "shadow_binder",
+            "binder_firewall_enabled" to "binder_firewall",
+            "binder_logging_enabled" to "binder_logging"
         )
         val experimentalKeys = setOf(
             "avf_manager_enabled",
@@ -143,6 +147,25 @@ class ShizukuPlusSettingsFragment : BaseSettingsFragment() {
         findPreference<Preference>("spoof_target")?.setOnPreferenceChangeListener { _, newValue ->
             preferenceManager.sharedPreferences?.edit()?.putString("spoof_target", newValue as String)?.apply()
             ShizukuSettings.syncAllPlusFeaturesToServer()
+            true
+        }
+
+        findPreference<Preference>(KEY_SHADOW_BINDER_HIDDEN_PACKAGES)?.setOnPreferenceChangeListener { _, _ ->
+            ShizukuSettings.syncAllPlusFeaturesToServer()
+            true
+        }
+
+        findPreference<Preference>("ai_core_plus_enabled")?.setOnPreferenceChangeListener { _, newValue ->
+            if (newValue == true) {
+                val lock = BiometricLock(requireActivity())
+                if (lock.canAuthenticate(requireContext())) {
+                    lock.authenticate({
+                        ShizukuSettings.setAICorePlusEnabled(true)
+                        ShizukuSettings.syncAllPlusFeaturesToServer()
+                    }, { _ -> /* Ignore or show toast */ })
+                    return@setOnPreferenceChangeListener false
+                }
+            }
             true
         }
 

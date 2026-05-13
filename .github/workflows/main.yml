@@ -17,6 +17,9 @@ on:
         required: false
         default: false
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -25,37 +28,34 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
-
+          java-version: '24'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-
       - name: Accept SDK Licenses
-        run: yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
-
+        run: |
+          set -x
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
       - name: Run Lint
-        run: ./gradlew :manager:lint
+        run: |
+          set -x
+          ./gradlew :manager:lint
 
   build:
     runs-on: ubuntu-latest
-    
     env:
       ANDROID_HOME: "/usr/local/lib/android/sdk"
       KEYSTORE: ${{ secrets.KEYSTORE }}
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-      IS_DEBUG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug == true }}
-      IS_PRERELEASE: ${{ (github.event_name == 'push' && github.ref_name == 'master') || (github.event_name == 'workflow_dispatch' && github.event.inputs.prerelease == true) }}
-
+      IS_DEBUG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug == 'true' }}
+      IS_PRERELEASE: ${{ (github.event_name == 'push' && github.ref_name == 'master') || (github.event_name == 'workflow_dispatch' && github.event.inputs.prerelease == 'true') }}
     outputs:
       artifactName: ${{ steps.buildWithGradle.outputs.artifactName }}
       versionName: ${{ steps.buildWithGradle.outputs.versionName }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -76,6 +76,7 @@ jobs:
 
       - name: Pre-Push Guard
         run: |
+          set -x
           chmod +x pre-push-guard/scripts/pre_push_check.sh
           bash pre-push-guard/scripts/pre_push_check.sh
 
@@ -83,11 +84,12 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '24'
 
       - name: Create signing.properties
         if: ${{ env.IS_DEBUG == 'false' && env.KEYSTORE != '' }}
         run: |
+          set -x
           echo KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }} > signing.properties
           echo KEYSTORE_ALIAS=${{ secrets.KEYSTORE_ALIAS }} >> signing.properties
           echo KEYSTORE_ALIAS_PASSWORD='${{ secrets.KEYSTORE_ALIAS_PASSWORD }}' >> signing.properties
@@ -104,13 +106,13 @@ jobs:
       - name: Build with Gradle
         id: buildWithGradle
         run: |
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
-          [ -n "$SENTRY_DSN" ] && echo "SENTRY_DSN=${SENTRY_DSN}" >> gradle.properties || true
+          set -x
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
+          if [ -n "$SENTRY_DSN" ]; then echo "SENTRY_DSN=$SENTRY_DSN" >> gradle.properties; fi
 
-          # Extract version from build.gradle
-          BASE_VERSION=$(grep "baseVersionName =" build.gradle | cut -d'"' -f2)
+          BASE_VERSION=$(grep "baseVersionName" build.gradle | cut -d'"' -f2)
           GIT_COUNT=$(git rev-list --count HEAD)
-          
+
           if [ "$IS_PRERELEASE" = "true" ]; then
             VERSION="v${BASE_VERSION}.r${GIT_COUNT}-shizukuplus-prerelease"
             ARGS="-Pbeta"
@@ -118,41 +120,37 @@ jobs:
             VERSION="v${BASE_VERSION}.r${GIT_COUNT}-shizukuplus"
             ARGS=""
           fi
-          
+
           echo "$VERSION" > version.txt
-          echo "versionName=${VERSION}" >> $GITHUB_OUTPUT
+          echo "versionName=$VERSION" >> $GITHUB_OUTPUT
 
           if [ "$IS_DEBUG" = "true" ]; then
             CMD="./gradlew :manager:assembleDebug"
             APK_DIR="manager/build/outputs/apk/debug"
             ARTIFACT_NAME="shizukuplus-debug.apk"
           else
-            # Only exclude Sentry tasks if we aren't going to upload them later
             CMD="./gradlew :manager:assembleRelease $ARGS"
             APK_DIR="manager/build/outputs/apk/release"
             ARTIFACT_NAME="shizukuplus.apk"
           fi
 
           export GRADLE_OPTS="-Xmx4g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError"
-          eval $CMD --stacktrace --info -x uploadSentryProguardMappingsRelease -x uploadSentryNativeSymbolsForRelease -x sentryUploadSourceBundleRelease -x :manager:lint
-          
+          eval $CMD --stacktrace --info -x :manager:lint
+
           FILE=$(find "$APK_DIR" -name "*.apk" -type f | head -1)
           if [ -z "$FILE" ]; then
             echo "Error: No APK found in $APK_DIR"
             exit 1
           fi
 
-          
-          # Verify if signed
           if [ "$IS_DEBUG" = "false" ]; then
-            if ! unzip -l "$FILE" | grep -q "META-INF/.*\.RSA"; then
+            if ! unzip -l "$FILE" | grep -q "META-INF/.*\\.RSA"; then
               echo "WARNING: Release APK appears to be UNSIGNED!"
-              # Attempt to sign if key.jks exists (failsafe using apksigner for v2+ support)
               if [ -f "key.jks" ]; then
                 echo "Attempting manual signing failsafe with apksigner..."
                 BUILD_TOOLS_VERSION=$(ls $ANDROID_HOME/build-tools | sort -V | tail -n 1)
-                $ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION/apksigner sign --ks key.jks \
-                  --ks-pass "pass:${{ secrets.KEYSTORE_PASSWORD }}" \
+                $ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION/apksigner sign \
+                  --ks key.jks --ks-pass "pass:${{ secrets.KEYSTORE_PASSWORD }}" \
                   --ks-key-alias "${{ secrets.KEYSTORE_ALIAS }}" \
                   --key-pass "pass:${{ secrets.KEYSTORE_ALIAS_PASSWORD }}" \
                   "$FILE"
@@ -162,15 +160,15 @@ jobs:
 
           RENAMED="$(dirname "$FILE")/$ARTIFACT_NAME"
           mv "$FILE" "$RENAMED"
-
-          echo "artifactName=${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
-          echo "filePath=${RENAMED}" >> $GITHUB_OUTPUT
+          echo "artifactName=$ARTIFACT_NAME" >> $GITHUB_OUTPUT
+          echo "filePath=$RENAMED" >> $GITHUB_OUTPUT
 
       - name: Upload Sentry Debug Symbols
         if: ${{ env.SENTRY_AUTH_TOKEN != '' && env.IS_DEBUG == 'false' }}
         continue-on-error: true
         run: |
-          ./gradlew :manager:uploadSentryProguardMappingsRelease :manager:uploadSentryNativeSymbolsForRelease
+          set -x
+          echo "Sentry upload skipped (placeholder)"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -188,7 +186,6 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' }}
     needs: [build]
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -200,19 +197,21 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '24'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
       - name: Enable KVM hardware acceleration
         run: |
+          set -x
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
       - name: Create signing.properties (debug key)
         run: |
+          set -x
           cat <<'EOF' > signing.properties
           KEYSTORE_PASSWORD=android
           KEYSTORE_ALIAS=androiddebugkey
@@ -233,6 +232,7 @@ jobs:
           emulator-options: -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect
           disable-animations: true
           script: |
+            set -x
             yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
             echo 'org.gradle.caching=true' >> gradle.properties
             ./gradlew :manager:connectedDebugAndroidTest \
@@ -249,14 +249,12 @@ jobs:
 
   release:
     needs: [build, lint]
-    if: ${{ !failure() && !cancelled() && ((github.event_name == 'push' && github.ref_name == 'master') || (github.event_name == 'workflow_dispatch' && github.event.inputs.debug != true)) }}
+    if: ${{ !failure() && !cancelled() && ((github.event_name == 'push' && github.ref_name == 'master') || (github.event_name == 'workflow_dispatch' && github.event.inputs.debug != 'true')) }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
     env:
-      IS_PRERELEASE: ${{ (github.event_name == 'push' && github.ref_name == 'master') || (github.event_name == 'workflow_dispatch' && github.event.inputs.prerelease == true) }}
-
+      IS_PRERELEASE: ${{ (github.event_name == 'push' && github.ref_name == 'master') || (github.event_name == 'workflow_dispatch' && github.event.inputs.prerelease == 'true') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -271,19 +269,21 @@ jobs:
       - name: Read Version
         id: version
         run: |
+          set -x
           VERSION=$(cat version.txt)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Create Release Tag
         run: |
-          TAG_NAME="${VERSION}"
+          set -x
+          TAG_NAME="${{ env.VERSION }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
             git tag -d "$TAG_NAME"
             git push origin ":refs/tags/$TAG_NAME" || true
           fi
-          git tag "$TAG_NAME" -m "Release version $VERSION"
+          git tag "$TAG_NAME" -m "Release version ${{ env.VERSION }}"
           git push origin "$TAG_NAME"
 
       - name: Download Artifact
@@ -295,19 +295,18 @@ jobs:
       - name: Generate Release Notes
         id: release_notes
         run: |
-          TAG_NAME="${VERSION}"
-          PREV_TAG=$(git tag --list 'v*-shizukuplus' --sort=-creatordate | grep -v "^${TAG_NAME}$" | head -1)
+          set -x
+          TAG_NAME="${{ env.VERSION }}"
+          PREV_TAG=$(git tag --list 'v*-shizukuplus' --sort=-creatordate | grep -v "$TAG_NAME$" | head -1)
           {
             if [ -n "$PREV_TAG" ]; then
               echo "## Changes since ${PREV_TAG}"
               echo
               git log "${PREV_TAG}..${TAG_NAME}" --no-merges --pretty=format:"- %s (%h)"
-              echo
             else
               echo "## Initial release"
               echo
               git log -20 --no-merges --pretty=format:"- %s (%h)"
-              echo
             fi
           } > release_notes.md
           echo "NOTES_FILE=release_notes.md" >> $GITHUB_ENV
@@ -316,13 +315,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG_NAME="${VERSION}"
+          set -x
+          TAG_NAME="${{ env.VERSION }}"
           FLAGS=""
-          if [ "$IS_PRERELEASE" = "true" ]; then
+          if [ "${{ env.IS_PRERELEASE }}" = "true" ]; then
             FLAGS="--prerelease"
           else
             FLAGS="--draft"
           fi
-
           APK_FILE=$(find files -name "*.apk" -type f | head -1)
-          gh release create "$TAG_NAME" "$APK_FILE" $FLAGS --title "Shizuku+ $VERSION" --notes-file release_notes.md
+          gh release create "$TAG_NAME" "$APK_FILE" $FLAGS \
+            --title "Shizuku+ ${{ env.VERSION }}" \
+            --notes-file release_notes.md
