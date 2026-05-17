@@ -22,6 +22,11 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
+      - name: Accept Android licenses
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
+
       - name: Build with Gradle
         run: ./gradlew assembleDebug --stacktrace
         env:
