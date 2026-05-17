@@ -20,14 +20,19 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-      - name: Install CMake
-        run: echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "cmake;3.31.0" > /dev/null || true
-        env:
-          ANDROID_HOME: /usr/local/lib/android/sdk
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android SDK Licenses
+        run: yes | sdkmanager --licenses || true
+
+      - name: Install NDK and CMake
+        run: sdkmanager "ndk;29.0.13113456" "cmake;3.31.0"
+
       - name: Build with Gradle
         run: ./gradlew assembleDebug --stacktrace
         env:
-          ANDROID_HOME: /usr/local/lib/android/sdk
+          ANDROID_HOME: ${{ env.ANDROID_HOME }}
           
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
