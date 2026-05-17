@@ -2,18 +2,20 @@ name: Android Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: set up JDK 21
+          
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
@@ -23,11 +25,12 @@ jobs:
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
       - name: Build with Gradle
-        run: ./gradlew :manager:assembleDebug
+        run: ./gradlew assembleDebug --stacktrace
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
-      - name: Upload APK
+          
+      - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: manager/build/outputs/apk/debug/
+          name: app-debug-apk
+          path: "**/build/outputs/apk/debug/*.apk"
