@@ -19,7 +19,7 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       - name: Build with Gradle
-        run: ./gradlew :manager:assembleDebug
+        run: ./gradlew :manager:assembleDebug --stacktrace
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
       - name: Upload APK
