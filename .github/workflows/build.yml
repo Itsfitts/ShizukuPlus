@@ -18,6 +18,10 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+      - name: Install CMake
+        run: echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "cmake;3.31.0" > /dev/null || true
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
       - name: Build with Gradle
         run: ./gradlew :manager:assembleDebug
         env:
