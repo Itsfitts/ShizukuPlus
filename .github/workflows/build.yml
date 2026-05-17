@@ -20,6 +20,8 @@ jobs:
           distribution: 'temurin'
       - name: Build with Gradle
         run: ./gradlew :manager:assembleDebug
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
