@@ -1314,6 +1314,8 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
             Bundle extra = new Bundle();
             extra.putParcelable("af.shizuku.plus.api.intent.extra.BINDER", new af.shizuku.api.BinderContainer(binder));
             extra.putParcelable("af.shizuku.intent.extra.BINDER", new af.shizuku.api.BinderContainer(binder));
+            extra.putParcelable("rikka.shizuku.intent.extra.BINDER", new af.shizuku.api.BinderContainer(binder));
+            extra.putParcelable("moe.shizuku.privileged.api.intent.extra.BINDER", new af.shizuku.api.BinderContainer(binder));
 
             Bundle reply = IContentProviderUtils.callCompat(provider, null, name, "sendBinder", null, extra);
             if (reply != null) {
