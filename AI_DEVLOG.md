@@ -380,3 +380,5 @@ coordinator_root fix (carried to Apr 23).
 **Notable:**
 - Ensured binary compatibility keys (rikka.shizuku.intent.extra.BINDER) are preserved in the server for legacy client support.
 - Fixed local build environment issues by properly identifying NDK toolchain paths and AAPT2 architecture requirements.
+
+- **Compatibility Fixes:** Restored legacy binder intent keys (rikka.shizuku and moe.shizuku) and updated rish C++ JNI signatures for the new af.rish namespace.
