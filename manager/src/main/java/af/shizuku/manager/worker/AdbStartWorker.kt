@@ -235,11 +235,10 @@ class AdbStartWorker(context: Context, params: WorkerParameters) : CoroutineWork
 
     companion object {
         fun enqueue(context: Context) {
-            // WorkManager uses credential-encrypted storage which is unavailable during direct boot.
-            // Skip enqueueing until the user has unlocked their device.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                val um = context.getSystemService(android.os.UserManager::class.java)
-                if (um != null && !um.isUserUnlocked) return
+            val safeContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                context.createDeviceProtectedStorageContext()
+            } else {
+                context
             }
 
             val cb = Constraints.Builder()
@@ -251,7 +250,7 @@ class AdbStartWorker(context: Context, params: WorkerParameters) : CoroutineWork
                 .setConstraints(constraints)
                 .build()
 
-            WorkManager.getInstance(context).enqueueUniqueWork(
+            WorkManager.getInstance(safeContext).enqueueUniqueWork(
                 "adb_start_worker",
                 ExistingWorkPolicy.REPLACE,
                 request

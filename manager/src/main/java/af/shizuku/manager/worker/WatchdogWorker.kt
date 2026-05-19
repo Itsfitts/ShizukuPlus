@@ -21,6 +21,12 @@ class WatchdogWorker(context: Context, params: WorkerParameters) : CoroutineWork
         private const val WORK_NAME = "shizuku_watchdog_healer"
 
         fun schedule(context: Context) {
+            val safeContext = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                context.createDeviceProtectedStorageContext()
+            } else {
+                context
+            }
+
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
                 .build()
@@ -30,7 +36,7 @@ class WatchdogWorker(context: Context, params: WorkerParameters) : CoroutineWork
                 .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 15, TimeUnit.MINUTES)
                 .build()
 
-            WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            WorkManager.getInstance(safeContext).enqueueUniquePeriodicWork(
                 WORK_NAME,
                 ExistingPeriodicWorkPolicy.KEEP,
                 request

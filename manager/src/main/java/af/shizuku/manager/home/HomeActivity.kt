@@ -88,11 +88,10 @@ abstract class HomeActivity : AppBarActivity(), MavericksView {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Fix Splash Screen NPE by utilizing proper themed context wrapper
+        val themedContext = android.view.ContextThemeWrapper(this, R.style.Theme_App_Starting)
         val splash = installSplashScreen()
         splash.setOnExitAnimationListener { provider ->
-            // Some OEM/Android 15 builds return a non-null typed View that is actually null
-            // at runtime (platform nullability contract violation). Wrapping in try-catch is
-            // the only reliable guard since the null check may be elided by R8 for non-null types.
             try {
                 val iconView = provider.iconView
                 if (iconView != null) {
