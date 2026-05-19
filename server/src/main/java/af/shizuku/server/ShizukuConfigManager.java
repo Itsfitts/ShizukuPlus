@@ -1,6 +1,6 @@
-package rikka.shizuku.server;
+package af.shizuku.server;
 
-import static rikka.shizuku.server.ServerConstants.PERMISSION;
+import static af.shizuku.server.ServerConstants.PERMISSION;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -27,7 +27,7 @@ import kotlin.collections.ArraysKt;
 import rikka.hidden.compat.PackageManagerApis;
 import rikka.hidden.compat.PermissionManagerApis;
 import rikka.hidden.compat.UserManagerApis;
-import rikka.shizuku.server.ktx.HandlerKt;
+import af.shizuku.server.ktx.HandlerKt;
 
 public class ShizukuConfigManager extends ConfigManager {
 

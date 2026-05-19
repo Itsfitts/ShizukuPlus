@@ -713,10 +713,10 @@ public class ShizukuSettings {
     }
 
     public static void syncAllPlusFeaturesToServer() {
-        if (!rikka.shizuku.Shizuku.pingBinder()) return;
+        if (!af.shizuku.Shizuku.pingBinder()) return;
         new Thread(() -> {
             try {
-                android.os.IBinder binder = (android.os.IBinder) rikka.shizuku.Shizuku.getBinder();
+                android.os.IBinder binder = (android.os.IBinder) af.shizuku.Shizuku.getBinder();
                 if (binder == null) return;
                 af.shizuku.server.IShizukuService service = af.shizuku.server.IShizukuService.Stub.asInterface(binder);
                 service.updatePlusFeatureEnabled("custom_api", isCustomApiEnabled());

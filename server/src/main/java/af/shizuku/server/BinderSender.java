@@ -1,4 +1,4 @@
-package rikka.shizuku.server;
+package af.shizuku.server;
 
 import static android.app.ActivityManagerHidden.UID_OBSERVER_ACTIVE;
 import static android.app.ActivityManagerHidden.UID_OBSERVER_CACHED;
@@ -23,7 +23,7 @@ import rikka.hidden.compat.PackageManagerApis;
 import rikka.hidden.compat.PermissionManagerApis;
 import rikka.hidden.compat.adapter.ProcessObserverAdapter;
 import rikka.hidden.compat.adapter.UidObserverAdapter;
-import rikka.shizuku.server.util.Logger;
+import af.shizuku.server.util.Logger;
 
 public class BinderSender {
 

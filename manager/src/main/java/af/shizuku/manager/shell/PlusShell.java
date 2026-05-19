@@ -13,9 +13,9 @@ import af.shizuku.server.IAICorePlus;
 import af.shizuku.server.IStorageProxy;
 import af.shizuku.server.IVirtualMachineManager;
 import af.shizuku.server.IShizukuService;
-import rikka.rish.RishConfig;
-import rikka.shizuku.Shizuku;
-import rikka.shizuku.ShizukuApiConstants;
+import af.rish.RishConfig;
+import af.shizuku.Shizuku;
+import af.shizuku.ShizukuApiConstants;
 import af.shizuku.manager.utils.Logger;
 
 public class PlusShell {

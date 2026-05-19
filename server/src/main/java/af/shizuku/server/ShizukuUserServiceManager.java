@@ -1,4 +1,4 @@
-package rikka.shizuku.server;
+package af.shizuku.server;
 
 import android.content.pm.PackageInfo;
 import android.util.ArrayMap;
@@ -12,7 +12,7 @@ import java.util.Map;
 import af.shizuku.starter.ServiceStarter;
 import rikka.hidden.compat.PackageManagerApis;
 import rikka.hidden.compat.UserManagerApis;
-import rikka.shizuku.server.util.UserHandleCompat;
+import af.shizuku.server.util.UserHandleCompat;
 
 public class ShizukuUserServiceManager extends UserServiceManager {
 

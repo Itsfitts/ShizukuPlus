@@ -33,7 +33,7 @@ import af.shizuku.manager.utils.UserHandleCompat
 import rikka.html.text.HtmlCompat
 import rikka.recyclerview.BaseViewHolder
 import rikka.recyclerview.BaseViewHolder.Creator
-import rikka.shizuku.Shizuku
+import af.shizuku.Shizuku
 
 class AppViewHolder(private val binding: AppListItemBinding) :
     BaseViewHolder<PackageInfo>(binding.root), View.OnClickListener, View.OnLongClickListener {
@@ -165,7 +165,7 @@ class AppViewHolder(private val binding: AppListItemBinding) :
             
             // Shizuku+ Power Tool: Freeze/Unfreeze
             if (ShizukuSettings.isCustomApiEnabled()) {
-                val shizukuService = rikka.shizuku.Shizuku.getBinder()
+                val shizukuService = af.shizuku.Shizuku.getBinder()
                 if (shizukuService != null) {
                     val amPlus = af.shizuku.server.IShizukuService.Stub.asInterface(shizukuService).activityManagerPlus
                     if (amPlus != null) {

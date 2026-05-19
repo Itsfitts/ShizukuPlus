@@ -1,4 +1,4 @@
-package rikka.shizuku.shell;
+package af.shizuku.shell;
 
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
@@ -53,7 +53,7 @@ public class ShizukuShellLoader {
         Bundle data = new Bundle();
         data.putBinder("binder", receiverBinder);
 
-        Intent intent = new Intent("rikka.shizuku.intent.action.REQUEST_BINDER")
+        Intent intent = new Intent("af.shizuku.intent.action.REQUEST_BINDER")
                 .setPackage("af.shizuku.plus.api")
                 .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
                 .putExtra("data", data);
@@ -84,7 +84,7 @@ public class ShizukuShellLoader {
             System.err.flush();
 
             Intent activityIntent = Intent.createChooser(
-                    new Intent("rikka.shizuku.intent.action.REQUEST_BINDER")
+                    new Intent("af.shizuku.intent.action.REQUEST_BINDER")
                             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)

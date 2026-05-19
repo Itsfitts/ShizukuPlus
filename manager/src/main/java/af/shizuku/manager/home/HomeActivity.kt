@@ -54,7 +54,7 @@ import rikka.lifecycle.Status
 import rikka.recyclerview.addEdgeSpacing
 import rikka.recyclerview.addItemSpacing
 import rikka.recyclerview.fixEdgeEffect
-import rikka.shizuku.Shizuku
+import af.shizuku.Shizuku
 
 abstract class HomeActivity : AppBarActivity(), MavericksView {
 

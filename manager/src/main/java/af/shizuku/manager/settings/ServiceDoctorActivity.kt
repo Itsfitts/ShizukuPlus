@@ -32,7 +32,7 @@ import af.shizuku.manager.utils.EnvironmentUtils
 import af.shizuku.manager.utils.SettingsHelper
 import af.shizuku.manager.utils.SettingsPage
 import af.shizuku.manager.utils.ShizukuStateMachine
-import rikka.shizuku.Shizuku
+import af.shizuku.Shizuku
 
 class ServiceDoctorActivity : AppBarActivity() {
 

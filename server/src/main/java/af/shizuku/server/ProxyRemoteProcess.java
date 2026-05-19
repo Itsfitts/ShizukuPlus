@@ -1,4 +1,4 @@
-package rikka.shizuku.server;
+package af.shizuku.server;
 
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;

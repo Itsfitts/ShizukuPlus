@@ -25,9 +25,9 @@ import af.shizuku.manager.utils.Logger.LOGGER
 import af.shizuku.manager.utils.ShizukuStateMachine
 import rikka.core.res.resolveColor
 import rikka.html.text.HtmlCompat
-import rikka.shizuku.Shizuku
-import rikka.shizuku.ShizukuApiConstants.REQUEST_PERMISSION_REPLY_ALLOWED
-import rikka.shizuku.ShizukuApiConstants.REQUEST_PERMISSION_REPLY_IS_ONETIME
+import af.shizuku.Shizuku
+import af.shizuku.ShizukuApiConstants.REQUEST_PERMISSION_REPLY_ALLOWED
+import af.shizuku.ShizukuApiConstants.REQUEST_PERMISSION_REPLY_IS_ONETIME
 
 class RequestPermissionActivity : AppActivity() {
 

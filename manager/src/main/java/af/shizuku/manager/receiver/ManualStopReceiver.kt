@@ -6,7 +6,7 @@ import android.content.Intent
 import af.shizuku.manager.BuildConfig
 import af.shizuku.manager.R
 import af.shizuku.manager.utils.ShizukuStateMachine
-import rikka.shizuku.Shizuku
+import af.shizuku.Shizuku
 
 class ManualStopReceiver : AuthenticatedReceiver() {
     override fun onAuthenticated(context: Context, intent: Intent) {

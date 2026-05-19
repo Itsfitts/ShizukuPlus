@@ -1,4 +1,4 @@
-package rikka.shizuku.server
+package af.shizuku.server
 
 import android.graphics.Rect
 import android.os.Bundle

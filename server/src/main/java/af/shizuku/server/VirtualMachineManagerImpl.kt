@@ -1,4 +1,4 @@
-package rikka.shizuku.server
+package af.shizuku.server
 
 import android.content.Context
 import android.os.Bundle

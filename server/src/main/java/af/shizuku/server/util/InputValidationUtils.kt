@@ -1,4 +1,4 @@
-package rikka.shizuku.server.util
+package af.shizuku.server.util
 
 import android.text.TextUtils
 import java.util.regex.Pattern

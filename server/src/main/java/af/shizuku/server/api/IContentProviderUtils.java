@@ -1,4 +1,4 @@
-package rikka.shizuku.server.api;
+package af.shizuku.server.api;
 
 import android.content.AttributionSource;
 import android.content.IContentProvider;
@@ -9,7 +9,7 @@ import android.os.RemoteException;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import rikka.shizuku.server.util.OsUtils;
+import af.shizuku.server.util.OsUtils;
 
 public class IContentProviderUtils {
 

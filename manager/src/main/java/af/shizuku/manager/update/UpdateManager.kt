@@ -248,7 +248,7 @@ class UpdateManager(private val context: Context) {
      */
     fun installApk(file: File) {
         try {
-            if (com.topjohnwu.superuser.Shell.getShell().isRoot || rikka.shizuku.Shizuku.pingBinder()) {
+            if (com.topjohnwu.superuser.Shell.getShell().isRoot || af.shizuku.Shizuku.pingBinder()) {
                 Timber.tag(TAG).d("Attempting silent install via Shizuku/Root...")
                 val result = com.topjohnwu.superuser.Shell.cmd("pm install -r -d \"${file.absolutePath}\"").exec()
                 if (result.isSuccess) {

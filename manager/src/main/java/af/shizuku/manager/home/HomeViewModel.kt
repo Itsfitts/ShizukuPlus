@@ -25,7 +25,7 @@ import af.shizuku.manager.utils.Logger.LOGGER
 import af.shizuku.manager.utils.SettingsHelper
 import af.shizuku.manager.utils.ShizukuSystemApis
 import af.shizuku.manager.utils.StockShizukuCompat
-import rikka.shizuku.Shizuku
+import af.shizuku.Shizuku
 
 @Keep
 class HomeViewModel(

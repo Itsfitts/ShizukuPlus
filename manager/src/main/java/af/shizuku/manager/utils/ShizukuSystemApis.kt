@@ -8,7 +8,7 @@ import rikka.hidden.compat.PackageManagerApis
 import rikka.hidden.compat.PermissionManagerApis
 import rikka.hidden.compat.UserManagerApis
 import rikka.hidden.compat.util.SystemServiceBinder
-import rikka.shizuku.ShizukuBinderWrapper
+import af.shizuku.ShizukuBinderWrapper
 
 object ShizukuSystemApis {
 

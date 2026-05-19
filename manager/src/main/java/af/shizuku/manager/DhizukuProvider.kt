@@ -11,7 +11,7 @@ import android.os.IBinder
 import android.os.ServiceManager
 import com.rosan.dhizuku.IDhizuku
 import af.shizuku.manager.utils.ShizukuStateMachine
-import rikka.shizuku.Shizuku
+import af.shizuku.Shizuku
 
 class DhizukuProvider : ContentProvider() {
 

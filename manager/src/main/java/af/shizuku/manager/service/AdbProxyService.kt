@@ -14,7 +14,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import af.shizuku.manager.ShizukuSettings
 import af.shizuku.manager.utils.EnvironmentUtils
-import rikka.shizuku.Shizuku
+import af.shizuku.Shizuku
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.PrintWriter

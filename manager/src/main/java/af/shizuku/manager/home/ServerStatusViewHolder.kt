@@ -15,8 +15,8 @@ import rikka.html.text.HtmlCompat
 import rikka.html.text.toHtml
 import rikka.recyclerview.BaseViewHolder
 import rikka.recyclerview.BaseViewHolder.Creator
-import rikka.shizuku.Shizuku
-import rikka.shizuku.ShizukuApiConstants
+import af.shizuku.Shizuku
+import af.shizuku.ShizukuApiConstants
 
 import af.shizuku.manager.utils.MotionUtils.applySpringTouch
 
@@ -155,7 +155,7 @@ class ServerStatusViewHolder(private val binding: HomeServerStatusBinding, root:
         summaryView.visibility = if (TextUtils.isEmpty(summaryView.text)) View.GONE else View.VISIBLE
 
         // M3E Pulse Animation for STARTING state
-        if (rikka.shizuku.Shizuku.isPreV11() || af.shizuku.manager.utils.ShizukuStateMachine.get() == af.shizuku.manager.utils.ShizukuStateMachine.State.STARTING) {
+        if (af.shizuku.Shizuku.isPreV11() || af.shizuku.manager.utils.ShizukuStateMachine.get() == af.shizuku.manager.utils.ShizukuStateMachine.State.STARTING) {
             val pulseAnim = android.view.animation.AlphaAnimation(0.6f, 1.0f).apply {
                 duration = 800
                 repeatMode = android.view.animation.Animation.REVERSE

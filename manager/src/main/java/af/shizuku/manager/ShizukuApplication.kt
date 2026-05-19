@@ -18,7 +18,7 @@ import af.shizuku.manager.utils.ShizukuStateMachine
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import rikka.core.util.BuildUtils.atLeast30
 import rikka.material.app.LocaleDelegate
-import rikka.shizuku.Shizuku
+import af.shizuku.Shizuku
 import timber.log.Timber
 import af.shizuku.manager.di.appModule
 import af.shizuku.manager.worker.RemoteDbSyncWorker

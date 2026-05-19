@@ -5,7 +5,7 @@ import android.content.pm.PackageManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import af.shizuku.manager.ktx.loge
-import rikka.shizuku.Shizuku
+import af.shizuku.Shizuku
 import timber.log.Timber
 
 object RootCompatHelper {

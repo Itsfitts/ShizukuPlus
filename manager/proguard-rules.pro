@@ -28,7 +28,7 @@
 }
 
 # Entrance of Shizuku service
--keep class rikka.shizuku.server.ShizukuService {
+-keep class af.shizuku.server.ShizukuService {
     public static void main(java.lang.String[]);
 }
 
@@ -62,7 +62,7 @@
 }
 
 #noinspection ShrinkerUnresolvedReference
--assumenosideeffects class rikka.shizuku.server.util.Logger {
+-assumenosideeffects class af.shizuku.server.util.Logger {
     public *** d(...);
 }
 
@@ -106,6 +106,6 @@
 -dontwarn androidx.compose.**
 
 -allowaccessmodification
-#-repackageclasses rikka.shizuku
+#-repackageclasses af.shizuku
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile

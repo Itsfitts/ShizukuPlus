@@ -34,7 +34,7 @@
 
 #define PACKAGE_NAME "af.shizuku.plus.api"
 #define SERVER_NAME "shizuku_server"
-#define SERVER_CLASS_PATH "rikka.shizuku.server.ShizukuService"
+#define SERVER_CLASS_PATH "af.shizuku.server.ShizukuService"
 
 #if defined(__arm__)
 #define ABI "arm"

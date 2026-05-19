@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import af.shizuku.manager.ShizukuApplication
 import af.shizuku.manager.ShizukuSettings
-import rikka.shizuku.Shizuku
+import af.shizuku.Shizuku
 import io.sentry.Sentry
 import io.sentry.Breadcrumb
 

@@ -7,9 +7,9 @@ import af.shizuku.manager.BuildConfig
 import af.shizuku.manager.Manifest
 import af.shizuku.manager.utils.Logger.LOGGER
 import af.shizuku.manager.utils.ShizukuSystemApis
-import rikka.shizuku.server.ServerConstants
+import af.shizuku.server.ServerConstants
 import rikka.parcelablelist.ParcelableListSlice
-import rikka.shizuku.Shizuku
+import af.shizuku.Shizuku
 import java.util.*
 
 object AuthorizationManager {

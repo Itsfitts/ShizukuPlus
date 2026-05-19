@@ -1,4 +1,4 @@
-package rikka.shizuku.server;
+package af.shizuku.server;
 
 public class ServerConstants {
 

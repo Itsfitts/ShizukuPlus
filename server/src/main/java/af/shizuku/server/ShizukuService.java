@@ -1,18 +1,18 @@
-package rikka.shizuku.server;
+package af.shizuku.server;
 
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
-import static rikka.shizuku.ShizukuApiConstants.ATTACH_APPLICATION_API_VERSION;
-import static rikka.shizuku.ShizukuApiConstants.ATTACH_APPLICATION_PACKAGE_NAME;
-import static rikka.shizuku.ShizukuApiConstants.BIND_APPLICATION_PERMISSION_GRANTED;
-import static rikka.shizuku.ShizukuApiConstants.BIND_APPLICATION_SERVER_PATCH_VERSION;
-import static rikka.shizuku.ShizukuApiConstants.BIND_APPLICATION_SERVER_SECONTEXT;
-import static rikka.shizuku.ShizukuApiConstants.BIND_APPLICATION_SERVER_UID;
-import static rikka.shizuku.ShizukuApiConstants.BIND_APPLICATION_SERVER_VERSION;
-import static rikka.shizuku.ShizukuApiConstants.BIND_APPLICATION_SHOULD_SHOW_REQUEST_PERMISSION_RATIONALE;
-import static rikka.shizuku.ShizukuApiConstants.REQUEST_PERMISSION_REPLY_ALLOWED;
-import static rikka.shizuku.ShizukuApiConstants.REQUEST_PERMISSION_REPLY_IS_ONETIME;
-import static rikka.shizuku.server.ServerConstants.MANAGER_APPLICATION_ID;
-import static rikka.shizuku.server.ServerConstants.PERMISSION;
+import static af.shizuku.ShizukuApiConstants.ATTACH_APPLICATION_API_VERSION;
+import static af.shizuku.ShizukuApiConstants.ATTACH_APPLICATION_PACKAGE_NAME;
+import static af.shizuku.ShizukuApiConstants.BIND_APPLICATION_PERMISSION_GRANTED;
+import static af.shizuku.ShizukuApiConstants.BIND_APPLICATION_SERVER_PATCH_VERSION;
+import static af.shizuku.ShizukuApiConstants.BIND_APPLICATION_SERVER_SECONTEXT;
+import static af.shizuku.ShizukuApiConstants.BIND_APPLICATION_SERVER_UID;
+import static af.shizuku.ShizukuApiConstants.BIND_APPLICATION_SERVER_VERSION;
+import static af.shizuku.ShizukuApiConstants.BIND_APPLICATION_SHOULD_SHOW_REQUEST_PERMISSION_RATIONALE;
+import static af.shizuku.ShizukuApiConstants.REQUEST_PERMISSION_REPLY_ALLOWED;
+import static af.shizuku.ShizukuApiConstants.REQUEST_PERMISSION_REPLY_IS_ONETIME;
+import static af.shizuku.server.ServerConstants.MANAGER_APPLICATION_ID;
+import static af.shizuku.server.ServerConstants.PERMISSION;
 
 import android.content.Context;
 import android.content.IContentProvider;
@@ -60,14 +60,14 @@ import rikka.hidden.compat.PackageManagerApis;
 import rikka.hidden.compat.PermissionManagerApis;
 import rikka.hidden.compat.UserManagerApis;
 import rikka.parcelablelist.ParcelableListSlice;
-import rikka.rish.RishConfig;
-import rikka.shizuku.ShizukuApiConstants;
-import rikka.shizuku.server.api.IContentProviderUtils;
-import rikka.shizuku.server.util.HandlerUtil;
-import rikka.shizuku.server.util.Logger;
-import rikka.shizuku.server.util.UserHandleCompat;
-import rikka.shizuku.server.ClientManager;
-import rikka.shizuku.server.ClientRecord;
+import af.rish.RishConfig;
+import af.shizuku.ShizukuApiConstants;
+import af.shizuku.server.api.IContentProviderUtils;
+import af.shizuku.server.util.HandlerUtil;
+import af.shizuku.server.util.Logger;
+import af.shizuku.server.util.UserHandleCompat;
+import af.shizuku.server.ClientManager;
+import af.shizuku.server.ClientRecord;
 
 public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuClientManager, ShizukuConfigManager> {
 
@@ -132,7 +132,7 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
     }
 
     @SuppressWarnings({"FieldCanBeLocal"})
-    private final Handler mainHandler = rikka.shizuku.server.ktx.HandlerKt.getMainHandler();
+    private final Handler mainHandler = af.shizuku.server.ktx.HandlerKt.getMainHandler();
     //private final Context systemContext = HiddenApiBridge.getSystemContext();
     private final ShizukuClientManager clientManager;
     private static final List<String> serverLogs = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
@@ -310,7 +310,7 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
 
         int replyServerVersion = ShizukuApiConstants.SERVER_VERSION;
         if (apiVersion == -1) {
-            // ShizukuBinderWrapper has adapted API v13 in dev.rikka.shizuku:api 12.2.0, however
+            // ShizukuBinderWrapper has adapted API v13 in dev.af.shizuku:api 12.2.0, however
             // attachApplication in 12.2.0 is still old, so that server treat the client as pre 13.
             // This finally cause transactRemote fails.
             // So we can pass 12 here to pretend we are v12 server.
@@ -882,7 +882,7 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
                     if (provider != null) {
                         android.os.Bundle extras = new android.os.Bundle();
                         extras.putString("value", value);
-                        rikka.shizuku.server.api.IContentProviderUtils.callCompat(provider, null, "settings", "PUT_" + namespace, key, extras);
+                        af.shizuku.server.api.IContentProviderUtils.callCompat(provider, null, "settings", "PUT_" + namespace, key, extras);
                         return newProcessInternal(new String[]{"true"}, env, dir);
                     }
                 } catch (Throwable tr) {
@@ -1313,7 +1313,7 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
 
             Bundle extra = new Bundle();
             extra.putParcelable("af.shizuku.plus.api.intent.extra.BINDER", new af.shizuku.api.BinderContainer(binder));
-            extra.putParcelable("rikka.shizuku.intent.extra.BINDER", new af.shizuku.api.BinderContainer(binder));
+            extra.putParcelable("af.shizuku.intent.extra.BINDER", new af.shizuku.api.BinderContainer(binder));
 
             Bundle reply = IContentProviderUtils.callCompat(provider, null, name, "sendBinder", null, extra);
             if (reply != null) {

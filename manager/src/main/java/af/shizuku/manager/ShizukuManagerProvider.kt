@@ -12,10 +12,10 @@ import kotlinx.coroutines.TimeoutCancellationException
 import af.shizuku.api.BinderContainer
 import af.shizuku.manager.utils.Logger.LOGGER
 import af.shizuku.manager.utils.ShizukuStateMachine
-import rikka.shizuku.Shizuku
-import rikka.shizuku.ShizukuApiConstants.USER_SERVICE_ARG_TOKEN
-import rikka.shizuku.ShizukuProvider
-import rikka.shizuku.server.ktx.workerHandler
+import af.shizuku.Shizuku
+import af.shizuku.ShizukuApiConstants.USER_SERVICE_ARG_TOKEN
+import af.shizuku.ShizukuProvider
+import af.shizuku.server.ktx.workerHandler
 
 class ShizukuManagerProvider : ShizukuProvider() {
 

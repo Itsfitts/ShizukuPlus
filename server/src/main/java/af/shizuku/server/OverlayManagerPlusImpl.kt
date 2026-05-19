@@ -1,11 +1,11 @@
-package rikka.shizuku.server
+package af.shizuku.server
 
 import android.os.IBinder
 import android.os.Process
 import android.os.ServiceManager
 import android.util.Log
 import af.shizuku.server.IOverlayManagerPlus
-import rikka.shizuku.server.util.UserHandleCompat
+import af.shizuku.server.util.UserHandleCompat
 
 class OverlayManagerPlusImpl : IOverlayManagerPlus.Stub() {
 

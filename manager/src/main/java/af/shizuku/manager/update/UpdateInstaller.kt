@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Environment
 import com.topjohnwu.superuser.Shell
 import af.shizuku.manager.utils.SettingsBackupManager
-import rikka.shizuku.Shizuku
+import af.shizuku.Shizuku
 import timber.log.Timber
 import java.io.File
 

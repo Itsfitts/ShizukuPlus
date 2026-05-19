@@ -7,8 +7,8 @@ import af.shizuku.api.BinderContainer
 import af.shizuku.starter.util.IContentProviderCompat
 import kotlinx.coroutines.*
 import rikka.hidden.compat.ActivityManagerApis
-import rikka.shizuku.ShizukuApiConstants
-import rikka.shizuku.server.UserService
+import af.shizuku.ShizukuApiConstants
+import af.shizuku.server.UserService
 import java.util.*
 
 object ServiceStarter {

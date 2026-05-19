@@ -1,4 +1,4 @@
-package rikka.shizuku.server
+package af.shizuku.server
 
 import android.os.Bundle
 import android.os.IBinder
@@ -8,9 +8,9 @@ import android.util.Log
 import af.shizuku.server.INetworkGovernorPlus
 import rikka.hidden.compat.ActivityManagerApis
 import rikka.hidden.compat.PackageManagerApis
-import rikka.shizuku.server.api.IContentProviderUtils
-import rikka.shizuku.server.util.InputValidationUtils
-import rikka.shizuku.server.util.UserHandleCompat
+import af.shizuku.server.api.IContentProviderUtils
+import af.shizuku.server.util.InputValidationUtils
+import af.shizuku.server.util.UserHandleCompat
 
 class NetworkGovernorPlusImpl : INetworkGovernorPlus.Stub() {
 

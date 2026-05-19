@@ -6,12 +6,12 @@ import android.os.IBinder
 import android.os.Parcel
 import af.shizuku.manager.ktx.loge
 import af.shizuku.manager.utils.Logger.LOGGER
-import rikka.shizuku.Shizuku
+import af.shizuku.Shizuku
 
 object ShellBinderRequestHandler {
 
     fun handleRequest(context: Context, intent: Intent): Boolean {
-        if (intent.action != "rikka.shizuku.intent.action.REQUEST_BINDER") {
+        if (intent.action != "af.shizuku.intent.action.REQUEST_BINDER") {
             return false
         }
 

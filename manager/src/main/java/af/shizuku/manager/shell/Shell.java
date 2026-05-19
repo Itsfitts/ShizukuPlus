@@ -4,10 +4,10 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.IBinder;
 
-import rikka.rish.Rish;
-import rikka.rish.RishConfig;
-import rikka.shizuku.Shizuku;
-import rikka.shizuku.ShizukuApiConstants;
+import af.rish.Rish;
+import af.rish.RishConfig;
+import af.shizuku.Shizuku;
+import af.shizuku.ShizukuApiConstants;
 
 public class Shell extends Rish {
 
