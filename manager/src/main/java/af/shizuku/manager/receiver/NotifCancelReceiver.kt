@@ -11,7 +11,12 @@ import af.shizuku.manager.utils.EnvironmentUtils
 
 class NotifCancelReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        WorkManager.getInstance(context).cancelUniqueWork("adb_start_worker")
+        val safeContext = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            context.createDeviceProtectedStorageContext()
+        } else {
+            context
+        }
+        WorkManager.getInstance(safeContext).cancelUniqueWork("adb_start_worker")
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         nm.cancel(ShizukuReceiverStarter.NOTIFICATION_ID)
     }

@@ -114,7 +114,7 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
 
         // Multi-user/Work-profile support: check all users if not found in User 0
         try {
-            List<Integer> userIds = UserManagerApis.getUserIdsNoThrow();
+            List<Integer> userIds = new java.util.ArrayList<>(UserManagerApis.getUserIdsNoThrow());
             if (userIds != null) {
                 for (int userId : userIds) {
                     if (userId == 0) continue;
@@ -1313,7 +1313,7 @@ public class ShizukuService extends Service<ShizukuUserServiceManager, ShizukuCl
 
             Bundle extra = new Bundle();
             extra.putParcelable("af.shizuku.plus.api.intent.extra.BINDER", new af.shizuku.api.BinderContainer(binder));
-            extra.putParcelable("rikka.shizuku.intent.extra.BINDER", new moe.shizuku.api.BinderContainer(binder));
+            extra.putParcelable("rikka.shizuku.intent.extra.BINDER", new af.shizuku.api.BinderContainer(binder));
 
             Bundle reply = IContentProviderUtils.callCompat(provider, null, name, "sendBinder", null, extra);
             if (reply != null) {

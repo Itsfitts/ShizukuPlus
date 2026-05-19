@@ -6,7 +6,7 @@ public class ServerConstants {
 
     public static final String PERMISSION = "af.shizuku.plus.permission.API_V23";
     public static final String PERMISSION_LEGACY = "af.shizuku.manager.permission.API_V23";
-    public static final String PERMISSION_ORIGINAL = "moe.shizuku.manager.permission.API_V23";
+    public static final String PERMISSION_ORIGINAL = "af.shizuku.manager.permission.API_V23";
     public static final String MANAGER_APPLICATION_ID = "af.shizuku.plus.api";
     public static final String REQUEST_PERMISSION_ACTION = MANAGER_APPLICATION_ID + ".intent.action.REQUEST_PERMISSION";
 

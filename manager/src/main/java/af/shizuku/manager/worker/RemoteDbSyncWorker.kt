@@ -28,14 +28,19 @@ class RemoteDbSyncWorker(context: Context, params: WorkerParameters) : Coroutine
         private const val MIN_REFRESH_INTERVAL_MS = 20 * 60 * 60 * 1_000L
 
         fun schedule(context: Context) {
+            val safeContext = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                context.createDeviceProtectedStorageContext()
+            } else {
+                context
+            }
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()
-            val request = PeriodicWorkRequestBuilder<RemoteDbSyncWorker>(24, TimeUnit.HOURS)
+            val request = PeriodicWorkRequestBuilder<RemoteDbSyncWorker>(24, java.util.concurrent.TimeUnit.HOURS)
                 .setConstraints(constraints)
-                .setInitialDelay(5, TimeUnit.MINUTES)
+                .setInitialDelay(5, java.util.concurrent.TimeUnit.MINUTES)
                 .build()
-            WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            WorkManager.getInstance(safeContext).enqueueUniquePeriodicWork(
                 WORK_NAME,
                 ExistingPeriodicWorkPolicy.KEEP,
                 request

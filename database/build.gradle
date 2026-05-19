@@ -30,6 +30,10 @@ android {
     }
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies {
     api libs.room.runtime
     api libs.room.ktx
