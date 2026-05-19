@@ -363,3 +363,20 @@ coordinator_root fix (carried to Apr 23).
 | ProGuard | `manager/proguard-rules.pro` |
 | UI strings | `manager/src/main/res/values/strings.xml` |
 | Settings XML | `manager/src/main/res/xml/settings*.xml` |
+
+---
+
+## Technical Remediation: Global Namespace Migration & CI Fixes (May 19, 2026)
+
+**Context:** Completing the transition from rikka.shizuku to af.shizuku and aligning CI for JDK 21 / NDK 29.
+
+**Done:**
+- **Global Package Rename:** Migrated all source files (Java, Kotlin, AIDL), manifest, and resources to the af.shizuku namespace.
+- **Project Structure Alignment:** Refactored directory paths across api, server, shell, and starter modules to match the new package identity.
+- **CI Modernization:** Updated GitHub Actions workflows to utilize JDK 21 and NDK 29.0.13113456.
+- **Submodule Sync:** Synchronized the api submodule with the same namespace migration.
+- **Documentation:** Updated READMEs and local constants to reflect the new API identity.
+
+**Notable:**
+- Ensured binary compatibility keys (rikka.shizuku.intent.extra.BINDER) are preserved in the server for legacy client support.
+- Fixed local build environment issues by properly identifying NDK toolchain paths and AAPT2 architecture requirements.
