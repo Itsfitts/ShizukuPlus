@@ -36,12 +36,12 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleRelease --stacktrace
         env:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
           
-      - name: Upload Debug APKs
+      - name: Upload Release APKs
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-apks
-          path: "**/build/outputs/apk/debug/*.apk"
+          name: app-release-apks
+          path: "out/apk/*.apk"

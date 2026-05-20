@@ -25,19 +25,19 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    - name: Accept Android SDK Licenses & Install CMake
+    - name: Accept Android SDK Licenses & Install CMake and NDK
       run: |
         yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
-        "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "cmake;3.31.0"
+        "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "cmake;3.31.0" "ndk;29.0.13113456"
 
     - name: Grant Execute Permission for Gradle
       run: chmod +x gradlew
 
-    - name: Build Manager APK
-      run: ./gradlew :manager:assembleDebug --no-daemon
+    - name: Build Project
+      run: ./gradlew assembleRelease --no-daemon
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: ShizukuCrimson-Manager
-        path: manager/build/outputs/apk/debug/*.apk
+        path: out/apk/*.apk

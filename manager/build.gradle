@@ -154,8 +154,8 @@ afterEvaluate {
     if (optimizeReleaseResources != null) {
         optimizeReleaseResources.finalizedBy(collapseReleaseResourceNames)
     }
-    tasks.findByName("preReleaseBuild")?.dependsOn(":shell:assembleRelease")
-    tasks.findByName("preDebugBuild")?.dependsOn(":shell:assembleDebug")
+    tasks.getByName("preReleaseBuild").dependsOn(":shell:assembleRelease")
+    tasks.getByName("preDebugBuild").dependsOn(":shell:assembleDebug")
 }
 
 android.applicationVariants.configureEach { variant ->
@@ -307,21 +307,4 @@ sentry {
 }
 
 apply from: rootProject.file("signing.gradle")
-
-// Ensure server builds before manager assets are packaged
-tasks.register('copyServerToAssets', Copy) {
-    // This assumes server produces a file in its build directory
-    from project(':server').layout.buildDirectory.file("outputs/apk/debug/server-debug.apk")
-    into 'src/main/assets'
-    rename { 'rish_shizuku.dex' } // Adjust name to match your app's expectations
-}
-
-// Ensure the copy task runs before the Android assets are merged
-android {
-    applicationVariants.all { variant ->
-        variant.mergeAssetsProvider.configure {
-            dependsOn copyServerToAssets
-        }
-    }
-}
 
