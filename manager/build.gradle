@@ -18,7 +18,7 @@ plugins {
 android {
     namespace = "af.shizuku.manager"
     defaultConfig {
-        applicationId = "af.shizuku"
+        applicationId = "af.shizuku.plus.api"
         versionCode = rootProject.ext.versionCode
         versionName = rootProject.ext.versionName
         def sentryDsn = project.findProperty('SENTRY_DSN') ?: ''
@@ -154,8 +154,8 @@ afterEvaluate {
     if (optimizeReleaseResources != null) {
         optimizeReleaseResources.finalizedBy(collapseReleaseResourceNames)
     }
-    tasks.findByName("preReleaseBuild")?.dependsOn(":shell:assembleRelease")
-    tasks.findByName("preDebugBuild")?.dependsOn(":shell:assembleDebug")
+    tasks.getByName("preReleaseBuild").dependsOn(":shell:assembleRelease")
+    tasks.getByName("preDebugBuild").dependsOn(":shell:assembleDebug")
 }
 
 android.applicationVariants.configureEach { variant ->
@@ -173,10 +173,10 @@ android.applicationVariants.configureEach { variant ->
                     into mappingDir
                     rename { String fileName -> "mapping-${variant.versionName}.txt" }
                 }
-                copy {
-                    from outputFile
-                    into apkDir
-                }
+            }
+            copy {
+                from outputFile
+                into apkDir
             }
         }
     }
@@ -307,3 +307,4 @@ sentry {
 }
 
 apply from: rootProject.file("signing.gradle")
+
