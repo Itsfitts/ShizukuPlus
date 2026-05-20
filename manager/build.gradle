@@ -18,7 +18,7 @@ plugins {
 android {
     namespace = "af.shizuku.manager"
     defaultConfig {
-        applicationId = "af.shizuku"
+        applicationId = "af.shizuku.plus.api"
         versionCode = rootProject.ext.versionCode
         versionName = rootProject.ext.versionName
         def sentryDsn = project.findProperty('SENTRY_DSN') ?: ''
@@ -173,10 +173,10 @@ android.applicationVariants.configureEach { variant ->
                     into mappingDir
                     rename { String fileName -> "mapping-${variant.versionName}.txt" }
                 }
-                copy {
-                    from outputFile
-                    into apkDir
-                }
+            }
+            copy {
+                from outputFile
+                into apkDir
             }
         }
     }
