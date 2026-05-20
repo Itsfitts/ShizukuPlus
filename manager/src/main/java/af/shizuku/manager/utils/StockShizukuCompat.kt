@@ -6,7 +6,7 @@ import android.content.pm.PackageManager
 
 object StockShizukuCompat {
 
-    const val PACKAGE = "moe.shizuku.privileged.api"
+    const val PACKAGE = "af.shizuku.privileged.api"
 
     fun isInstalled(context: Context): Boolean {
         return try {

@@ -6,7 +6,7 @@ import com.topjohnwu.superuser.Shell
 import timber.log.Timber
 
 /**
- * Detects and migrates settings from the old `moe.shizuku.privileged.api` package
+ * Detects and migrates settings from the old `af.shizuku.privileged.api` package
  * to the current `af.shizuku.plus.api` package.
  *
  * The applicationId changed, so users cannot do an in-place update — they must uninstall
@@ -15,7 +15,7 @@ import timber.log.Timber
  */
 object MigrationHelper {
 
-    const val OLD_PACKAGE = "moe.shizuku.privileged.api"
+    const val OLD_PACKAGE = "af.shizuku.privileged.api"
     private const val TAG = "MigrationHelper"
 
     private val OLD_PREFS_PATH = "/data/data/$OLD_PACKAGE/shared_prefs/settings.xml"
